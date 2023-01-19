@@ -6,9 +6,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
@@ -31,8 +28,6 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handlerInternalException(final InternalServerErrorException e) {
         log.info("500 {}", e.getMessage(), e);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        e.printStackTrace(new PrintStream(out));
-        return new ErrorResponse(out.toString());
+        return new ErrorResponse(e.getMessage());
     }
 }
