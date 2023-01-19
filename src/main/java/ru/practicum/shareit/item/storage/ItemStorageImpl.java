@@ -77,16 +77,15 @@ public class ItemStorageImpl implements ItemStorage {
                 .findFirst().orElseThrow(() -> {
                     log.warn("Вещь с itemId{} не найдена", itemId);
                     throw new NotFoundException("Вещь не найдена");
-                })
-                ;
-            if (item.getName() != null) {
-                updItem.setName(item.getName());
+                });
+        if (item.getName() != null) {
+            updItem.setName(item.getName());
         }
-            if (item.getDescription() != null) {
-                updItem.setDescription(item.getDescription());
+        if (item.getDescription() != null) {
+            updItem.setDescription(item.getDescription());
         }
-            if (item.getAvailable() != null) {
-                updItem.setAvailable(item.getAvailable());
+        if (item.getAvailable() != null) {
+            updItem.setAvailable(item.getAvailable());
         }
         items.get(userId).removeIf(item1 -> item1.getId() == itemId);
         items.get(userId).add(updItem);

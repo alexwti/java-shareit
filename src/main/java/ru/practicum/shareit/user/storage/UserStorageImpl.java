@@ -7,21 +7,17 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Repository
 public class UserStorageImpl implements UserStorage {
 
-    private int id = 1;
     private final Map<Long, User> users = new HashMap<>();
+    private int id = 1;
 
     @Override
     public List<User> findAll() {
-        return users.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(users.values());
     }
 
     @Override
