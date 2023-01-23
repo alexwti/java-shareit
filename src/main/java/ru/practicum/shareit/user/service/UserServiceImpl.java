@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
@@ -34,6 +35,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        emailValidate(userDto.getEmail());
         UserDto crUserDto = storage.createUser(userDto);
         log.info("Пользователь создан");
         return crUserDto;
@@ -41,6 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(long id, User user) {
+        emailValidate(user.getEmail());
         User updUser = storage.updateUser(id, user);
         log.info("Пользователь с id {} обновлен", id);
         return updUser;
@@ -50,5 +53,12 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(long id) {
         log.info("Пользователь с id {} удалён", id);
         storage.deleteUser(id);
+    }
+
+    public void emailValidate(String email) {
+        List<User> users = findAll();
+        if (users.stream().anyMatch(u -> u.getEmail().equals(email))) {
+            throw new ValidationException("Пользователь с таким e-mail уже существует");
+        }
     }
 }

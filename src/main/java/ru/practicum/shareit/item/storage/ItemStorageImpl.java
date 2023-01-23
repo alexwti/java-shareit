@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.mapper.ItemMapperImpl;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
@@ -16,13 +16,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemStorageImpl implements ItemStorage {
     private final Map<Long, List<Item>> items = new HashMap<>();
+    private final ItemMapperImpl itemMapper = new ItemMapperImpl();
     private long id = 1;
 
     @Override
     public List<ItemDto> getAllItemsOfOwner(long userId) {
         List<Item> itemsOfOwner = items.getOrDefault(userId, Collections.emptyList());
         return itemsOfOwner.stream()
-                .map(ItemMapper::toItemDto)
+                .map(itemMapper::toModelDto)
                 .collect(Collectors.toList());
     }
 
@@ -33,7 +34,7 @@ public class ItemStorageImpl implements ItemStorage {
         return allItems.stream()
                 .filter(itemsOfOwner -> itemsOfOwner.getId() == itemId)
                 .findFirst()
-                .map(ItemMapper::toItemDto);
+                .map(itemMapper::toModelDto);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class ItemStorageImpl implements ItemStorage {
         return items.getOrDefault(userId, Collections.emptyList()).stream()
                 .filter(itemsOfOwner -> itemsOfOwner.getId() == itemId)
                 .findFirst()
-                .map(ItemMapper::toItemDto);
+                .map(itemMapper::toModelDto);
     }
 
     @Override
@@ -52,14 +53,14 @@ public class ItemStorageImpl implements ItemStorage {
                 .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()) ||
                         item.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .filter(Item::getAvailable)
-                .map(ItemMapper::toItemDto)
+                .map(itemMapper::toModelDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public ItemDto createItem(long userId, ItemDto itemDto) {
         itemDto.setId(id++);
-        Item item = ItemMapper.toItem(itemDto, userId);
+        Item item = itemMapper.toModel(itemDto);
         items.compute(userId, (id, itemsOfOwner) -> {
             if (itemsOfOwner == null) {
                 itemsOfOwner = new ArrayList<>();
@@ -67,7 +68,7 @@ public class ItemStorageImpl implements ItemStorage {
             itemsOfOwner.add(item);
             return itemsOfOwner;
         });
-        return ItemMapper.toItemDto(item);
+        return itemMapper.toModelDto(item);
     }
 
     @Override
@@ -89,6 +90,6 @@ public class ItemStorageImpl implements ItemStorage {
         }
         items.get(userId).removeIf(item1 -> item1.getId() == itemId);
         items.get(userId).add(updItem);
-        return ItemMapper.toItemDto(updItem);
+        return itemMapper.toModelDto(updItem);
     }
 }
