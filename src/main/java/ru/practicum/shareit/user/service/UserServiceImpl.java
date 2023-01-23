@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final UserMapper userMapper;
     private final UserStorage storage;
 
     @Override
@@ -26,7 +28,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(long id) {
-        log.info("Пользователь с id{} выгружен", id);
+        log.info("Пользователь с id {} выгружен", id);
         return storage.getUserById(id).orElseThrow(() -> {
             log.warn("Пользователь с id {} не найден", id);
             throw new NotFoundException("Пользователь не найден");
@@ -36,9 +38,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         emailValidate(userDto.getEmail());
-        UserDto crUserDto = storage.createUser(userDto);
-        log.info("Пользователь создан");
-        return crUserDto;
+        User user = storage.createUser(userMapper.toModel(userDto));
+        log.info("Пользователь {} создан", user.toString());
+        return userMapper.toModelDto(user);
     }
 
     @Override

@@ -2,8 +2,6 @@ package ru.practicum.shareit.user.storage;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapperImpl;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -12,7 +10,6 @@ import java.util.*;
 public class UserStorageImpl implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
-    private final UserMapperImpl userMapper = new UserMapperImpl();
     private int id = 1;
 
     @Override
@@ -26,10 +23,10 @@ public class UserStorageImpl implements UserStorage {
     }
 
     @Override
-    public UserDto createUser(UserDto userDto) {
-        userDto.setId(id++);
-        users.put(userDto.getId(), userMapper.toModel(userDto));
-        return userDto;
+    public User createUser(User user) {
+        user.setId(id++);
+        users.put(user.getId(), user);
+        return user;
     }
 
     @Override

@@ -1,10 +1,12 @@
 package ru.practicum.shareit.user.mapper;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.util.BaseMapper;
 
-public class UserMapperImpl implements BaseMapper<UserDto, User> {
+@Component
+public class UserMapper implements BaseMapper<UserDto, User> {
 
     @Override
     public UserDto toModelDto(User user) {
