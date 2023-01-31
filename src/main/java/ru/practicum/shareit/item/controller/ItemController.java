@@ -23,8 +23,8 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader(SHARER_USER_ID) long userId, @PathVariable long itemId, @RequestBody Item item) {
-        return service.updateItem(userId, itemId, item);
+    public ItemDto updateItem(@RequestHeader(SHARER_USER_ID) long userId, @PathVariable long itemId, @RequestBody ItemDto itemDto) {
+        return service.updateItem(userId, itemId, itemDto);
     }
 
     @GetMapping
