@@ -5,10 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collections;
@@ -23,6 +28,8 @@ public class ItemServiceImpl implements ItemService {
     private final ItemMapper itemMapper;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
     @Transactional
     @Override
@@ -32,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Пользователь не найден");
         });
         Item item = itemMapper.toModel(itemDto);
-        item.setUserId(userId);
+        item.setOwnerId(userId);
         log.info("Item created");
         return itemMapper.toModelDto(itemRepository.save(item));
     }
@@ -45,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Вещь {} с id {} не найдена", item, itemId);
             throw new NotFoundException("Вещь не найдена");
         });
-        if (userId != updItem.getUserId()) {
+        if (userId != updItem.getOwnerId()) {
             log.warn("Вещь {} у пользователя с id {} не найдена", item, userId);
             throw new NotFoundException("Вещь у пользователя не найдена");
         }
@@ -59,8 +66,24 @@ public class ItemServiceImpl implements ItemService {
             updItem.setAvailable(item.getAvailable());
         }
 
-        log.info("Вещь {} обновлена", item.toString());
+        log.info("Вещь {} обновлена", item);
         return itemMapper.toModelDto(itemRepository.save(updItem));
+    }
+
+    @Transactional
+    @Override
+    public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            log.warn("Пользователь с id {} не найден", userId);
+            throw new NotFoundException("Пользователь не найден");
+        });
+
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> {
+            log.warn("Вещь с id {} не найдена", itemId);
+            throw new NotFoundException("Вещь не найдена");
+        });
+        Comment comment = commentMapper.toModel(user, item, commentDto);
+        return commentMapper.toModelDto(commentRepository.save(comment));
     }
 
     @Transactional(readOnly = true)
@@ -77,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getAllItemsOfOwner(long userId) {
         log.info("Вещь пользователя с id {} выгружены", userId);
-        return itemRepository.findAllByUserIdOrderById(userId).stream()
+        return itemRepository.findAllByOwnerIdOrderById(userId).stream()
                 .map(itemMapper::toModelDto)
                 .collect(Collectors.toList());
     }

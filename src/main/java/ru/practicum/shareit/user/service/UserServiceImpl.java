@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.DataExistException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -41,23 +41,29 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
-        emailValidate(userDto.getEmail());
-        User user = repository.save(userMapper.toModel(userDto));
-        log.info("Пользователь {} создан", user.toString());
-        return userMapper.toModelDto(user);
+        //emailValidate(userDto.getEmail());
+        try {
+            User user = repository.save(userMapper.toModel(userDto));
+            log.info("Пользователь {} создан", user);
+            return userMapper.toModelDto(user);
+        } catch (DataExistException e) {
+            throw new DataExistException(String.format("Пользователь с email %s уже есть в базе", userDto.getEmail()));
+        }
     }
 
     @Transactional
     @Override
     public User updateUser(long id, User user) {
-        emailValidate(user.getEmail());
         User updUser = repository.findById(id).orElseThrow(() -> {
             log.warn("Пользователь с id {} не найден", id);
             throw new NotFoundException("Пользователь не найден");
         });
-                ;
         if (user.getEmail() != null && !user.getEmail().trim().isEmpty()) {
-            updUser.setEmail(user.getEmail());
+            try {
+                updUser.setEmail(user.getEmail());
+            } catch (DataExistException e) {
+                throw new DataExistException(String.format("Пользователь с email %s уже есть в базе", user.getEmail()));
+            }
         }
         if (user.getName() != null && !user.getName().trim().isEmpty()) {
             updUser.setName(user.getName());
@@ -72,12 +78,5 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(long id) {
         log.info("Пользователь с id {} удалён", id);
         repository.deleteById(id);
-    }
-
-    public void emailValidate(String email) {
-        List<User> users = findAll();
-        if (users.stream().anyMatch(u -> u.getEmail().equals(email))) {
-            throw new ValidationException("Пользователь с таким e-mail уже существует");
-        }
     }
 }

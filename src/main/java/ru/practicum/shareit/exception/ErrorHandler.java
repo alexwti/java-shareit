@@ -30,4 +30,11 @@ public class ErrorHandler {
         log.info("500 {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDataExistExceptionException(DataExistException e) {
+        log.warn("409 {}", e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
+    }
 }

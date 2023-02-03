@@ -24,5 +24,5 @@ public class ItemDto {
     private String description;
     @NotNull(message = "Лоступность должна быть заполнена")
     private Boolean available;
-    private long userId;
+    private long ownerId;
 }

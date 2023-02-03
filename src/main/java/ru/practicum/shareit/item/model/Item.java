@@ -18,15 +18,15 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, length = 255)
+    @Column
     private String name;
 
-    @Column(nullable = false, length = 1000)
+    @Column
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private Boolean available;
 
-    @Column(name = "user_id", nullable = false)
-    private long userId;
+    @Column(name = "user_id")
+    private long ownerId;
 }

@@ -14,7 +14,7 @@ public class ItemMapper implements BaseMapper<ItemDto, Item> {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getUserId()
+                item.getOwnerId()
         );
     }
 
@@ -24,6 +24,6 @@ public class ItemMapper implements BaseMapper<ItemDto, Item> {
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
-                itemDto.getUserId());
+                itemDto.getOwnerId());
     }
 }
