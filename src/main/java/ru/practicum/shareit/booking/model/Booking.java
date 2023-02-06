@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.model;
 import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.util.StartEnd;
 
 import javax.persistence.*;
 import javax.validation.constraints.Future;
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "bookings")
-@StartEnd(message = "Дата окончания не может быть больше даты начала")
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,23 +22,23 @@ public class Booking {
 
     @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)
+    @JoinColumn(name = "item_id")
     private Item item;
 
     @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "booker_id", nullable = false)
+    @JoinColumn(name = "booker_id")
     private User booker;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status")
     private BookingStatus status;
 
     @FutureOrPresent
-    @Column(name = "start_booking", nullable = false)
+    @Column(name = "start_booking")
     private LocalDateTime start;
 
     @Future
-    @Column(name = "end_booking", nullable = false)
+    @Column(name = "end_booking")
     private LocalDateTime end;
 }

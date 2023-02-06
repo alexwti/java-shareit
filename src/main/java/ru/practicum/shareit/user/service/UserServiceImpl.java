@@ -41,7 +41,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
-        //emailValidate(userDto.getEmail());
         try {
             User user = repository.save(userMapper.toModel(userDto));
             log.info("Пользователь {} создан", user);

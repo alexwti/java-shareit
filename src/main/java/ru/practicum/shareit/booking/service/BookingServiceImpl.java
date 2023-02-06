@@ -5,13 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.UnsupportedStateException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
@@ -35,7 +37,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDtoShort createBooking(long bookerId, BookingDtoShort bookingDtoShort) {
+    public BookingDto createBooking(long bookerId, BookingDtoShort bookingDtoShort) {
         Item item = itemRepository.findById(bookingDtoShort.getItemId()).orElseThrow(() -> {
             log.warn("Вещь id {} не найдена", itemRepository.findById(bookingDtoShort.getItemId()));
             throw new NotFoundException("Вещь не найдена");
@@ -50,16 +52,19 @@ public class BookingServiceImpl implements BookingService {
         }
         if (!item.getAvailable()) {
             log.warn("Вещь с id {} в статусе недоступности для заказа", item.getId());
-            throw new ValidationException("Вещь недоступна для заказа");
+            throw new BadRequestException("Вещь недоступна для заказа");
+        }
+        if (bookingDtoShort.getEnd().isBefore(bookingDtoShort.getStart())) {
+            throw new BadRequestException("Время окончания заказа не может быть раньше начала");
         }
         bookingDtoShort.setStatus(BookingStatus.WAITING);
-        log.info("Вещь создана");
-        return bookingMapper.toModelDtoShort(bookingRepository.save(bookingMapper.toModel(bookingDtoShort, item, user)));
+        log.info("Бронь создана");
+        return bookingMapper.toModelDto(bookingRepository.save(bookingMapper.toModel(bookingDtoShort, item, user)));
     }
 
     @Override
     @Transactional
-    public BookingDtoShort changeBookingStatus(long userId, long bookingId, boolean approved) {
+    public BookingDto changeBookingStatus(long userId, long bookingId, boolean approved) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
             log.warn("Резерв id {} не найден", bookingId);
             throw new NotFoundException("Резерв не найден");
@@ -71,25 +76,25 @@ public class BookingServiceImpl implements BookingService {
         }
         if (booking.getStatus() == BookingStatus.APPROVED) {
             log.warn("Резерв {} ужк утвержден", bookingId);
-            throw new ValidationException("Вы не можете сменить статус у утвержденного резерва");
+            throw new BadRequestException("Вы не можете сменить статус у утвержденного резерва");
         }
         if (approved) {
             booking.setStatus(BookingStatus.APPROVED);
         } else {
             booking.setStatus(BookingStatus.REJECTED);
         }
-        return bookingMapper.toModelDtoShort(bookingRepository.save(booking));
+        return bookingMapper.toModelDto(bookingRepository.save(booking));
     }
 
     @Override
-    public BookingDtoShort getBookingInfo(long userId, long bookingId) {
+    public BookingDto getBookingInfo(long userId, long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> {
             log.warn("Резерв id {} не найден", bookingId);
             throw new NotFoundException("Резерв не найден");
         });
         Item item = booking.getItem();
         if (booking.getBooker().getId() == userId || item.getOwnerId() == userId) {
-            return bookingMapper.toModelDtoShort(booking);
+            return bookingMapper.toModelDto(booking);
         } else {
             log.warn("Пользователь id {} не имеет прав работы с резервом {}", userId, bookingId);
             throw new NotFoundException("У вас нет прав на просмотр сведений обаренде этой вещи");
@@ -97,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoShort> getBookingsByBooker(long bookerId, String state) {
+    public List<BookingDto> getBookingsByBooker(long bookerId, String state) {
         userRepository.findById(bookerId).orElseThrow(() -> {
             log.warn("Пользователь с id {} не найден", bookerId);
             throw new NotFoundException("Пользователь не найден");
@@ -126,15 +131,16 @@ public class BookingServiceImpl implements BookingService {
                 break;
             default:
                 log.warn("Неизестный статус {}", state);
-                throw new NotFoundException("Неизестный статус: " + state);
+                String message = String.format("Unknown state: %S", state);
+                throw new UnsupportedStateException(message);
         }
         return bookings.stream()
-                .map(bookingMapper::toModelDtoShort)
+                .map(bookingMapper::toModelDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingDtoShort> getBookingsByOwner(long ownerId, String state) {
+    public List<BookingDto> getBookingsByOwner(long ownerId, String state) {
         userRepository.findById(ownerId).orElseThrow(() -> {
             log.warn("Пользователь с id {} не найден", ownerId);
             throw new NotFoundException("Пользователь не найден");
@@ -163,10 +169,11 @@ public class BookingServiceImpl implements BookingService {
                 break;
             default:
                 log.warn("Неизестный статус {}", state);
-                throw new NotFoundException("Неизестный статус: " + state);
+                String message = String.format("Unknown state: %S", state);
+                throw new UnsupportedStateException(message);
         }
         return bookings.stream()
-                .map(bookingMapper::toModelDtoShort)
+                .map(bookingMapper::toModelDto)
                 .collect(Collectors.toList());
     }
 }

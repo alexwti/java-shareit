@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByBookerId(long bookerId, Sort sort);
@@ -18,7 +19,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByBookerIdAndEndBefore(long bookerId, LocalDateTime dateTime, Sort sort);
 
-    @Query("select b from Booking b where b.item.ownerId = ?1 and b.start < ?2 and b.end > ?2")
+    @Query("select b from Booking b where b.booker.id = ?1 and b.start < ?2 and b.end > ?2")
     List<Booking> findAllByBookerIdCurrent(long bookerId, LocalDateTime dateTimeStart, Sort sort);
 
     @Query("select b from Booking b where b.item.ownerId = ?1")
@@ -36,4 +37,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("select b from Booking b where b.item.ownerId = ?1 and b.start < ?2 and b.end > ?2")
     List<Booking> findAllByOwnerIdCurrent(long ownerId, LocalDateTime dateTimeStart, Sort sort);
 
+    @Query("select distinct booking from Booking booking where booking.end < ?2 and booking.item.id = ?1 " +
+            "order by booking.start desc ")
+    Optional<Booking> findLastBooking(long itemId, LocalDateTime now);
+
+    @Query("select distinct booking from Booking booking where booking.start > ?2 and booking.item.id = ?1 " +
+            "order by booking.start ")
+    Optional<Booking> findNextBooking(long itemId, LocalDateTime now);
+
+    Optional<Booking> findByBookerIdAndItemIdAndEndBefore(long bookerId, long itemId, LocalDateTime end);
 }
