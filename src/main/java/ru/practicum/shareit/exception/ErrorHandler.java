@@ -50,6 +50,5 @@ public class ErrorHandler {
     public ErrorResponse handlerUnsupportedState(final UnsupportedStateException e) {
         log.warn("500 {}", e.getMessage(), e);
         return new ErrorResponse(500, "Unsupported State", e.getMessage());
-        //return new ErrorResponse(e.getMessage(), e.getMessage());
     }
 }
