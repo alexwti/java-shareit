@@ -6,7 +6,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoShort;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -37,9 +36,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDto createBooking(long bookerId, BookingDtoShort bookingDtoShort) {
-        Item item = itemRepository.findById(bookingDtoShort.getItemId()).orElseThrow(() -> {
-            log.warn("Вещь id {} не найдена", itemRepository.findById(bookingDtoShort.getItemId()));
+    public BookingDto createBooking(long bookerId, BookingDto bookingDto) {
+        Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() -> {
+            log.warn("Вещь id {} не найдена", itemRepository.findById(bookingDto.getItemId()));
             throw new NotFoundException("Вещь не найдена");
         });
         User user = userRepository.findById(bookerId).orElseThrow(() -> {
@@ -54,12 +53,12 @@ public class BookingServiceImpl implements BookingService {
             log.warn("Вещь с id {} в статусе недоступности для заказа", item.getId());
             throw new BadRequestException("Вещь недоступна для заказа");
         }
-        if (bookingDtoShort.getEnd().isBefore(bookingDtoShort.getStart())) {
+        if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
             throw new BadRequestException("Время окончания заказа не может быть раньше начала");
         }
-        bookingDtoShort.setStatus(BookingStatus.WAITING);
+        bookingDto.setStatus(BookingStatus.WAITING);
         log.info("Бронь создана");
-        return bookingMapper.toModelDto(bookingRepository.save(bookingMapper.toModel(bookingDtoShort, item, user)));
+        return bookingMapper.toModelDto(bookingRepository.save(bookingMapper.toModel(bookingDto, item, user)));
     }
 
     @Override

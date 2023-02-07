@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.booking.dto.BookingDtoShort;
+import ru.practicum.shareit.booking.dto.BookingDto;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ public class ItemDtoExt {
     private String name;
     private String description;
     private Boolean available;
-    private BookingDtoShort lastBooking;
-    private BookingDtoShort nextBooking;
+    private BookingDto lastBooking;
+    private BookingDto nextBooking;
     private List<CommentDto> comments;
     private long ownerId;
 }

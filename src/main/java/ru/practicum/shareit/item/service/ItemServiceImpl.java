@@ -133,11 +133,11 @@ public class ItemServiceImpl implements ItemService {
             itemDtoExt.setLastBooking(
                     bookingRepository.findLastBooking(
                             itemDtoExt.getId(), LocalDateTime.now()
-                    ).map(bookingMapper::toModelDtoShort).orElse(null));
+                    ).map(bookingMapper::toModelDto).orElse(null));
             itemDtoExt.setNextBooking(
                     bookingRepository.findNextBooking(
                             itemDtoExt.getId(), LocalDateTime.now()
-                    ).map(bookingMapper::toModelDtoShort).orElse(null));
+                    ).map(bookingMapper::toModelDto).orElse(null));
         } else {
             itemDtoExt.setLastBooking(null);
             itemDtoExt.setNextBooking(null);
