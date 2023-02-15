@@ -1,32 +1,24 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.shareit.booking.dto.BookingDto;
 
-import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "items")
-public class Item {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@NoArgsConstructor
+public class ItemDtoExt {
     private long id;
-
-    @Column
     private String name;
-
-    @Column
     private String description;
-
-    @Column
     private Boolean available;
-
-    @Column(name = "user_id")
+    private BookingDto lastBooking;
+    private BookingDto nextBooking;
+    private List<CommentDto> comments;
     private long ownerId;
 }
