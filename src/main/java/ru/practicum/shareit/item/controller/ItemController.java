@@ -15,26 +15,26 @@ import java.util.List;
 @RequiredArgsConstructor
 
 public class ItemController {
-    public static final String SHARERUSERID = "X-Sharer-User-Id";
+    public static final String SharerUserId = "X-Sharer-User-Id";
     private final ItemService service;
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader(SHARERUSERID) long userId, @Valid @RequestBody ItemDto itemDto) {
+    public ItemDto createItem(@RequestHeader(SharerUserId) long userId, @Valid @RequestBody ItemDto itemDto) {
         return service.createItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader(SHARERUSERID) long userId, @PathVariable long itemId, @RequestBody ItemDto itemDto) {
+    public ItemDto updateItem(@RequestHeader(SharerUserId) long userId, @PathVariable long itemId, @RequestBody ItemDto itemDto) {
         return service.updateItem(userId, itemId, itemDto);
     }
 
     @GetMapping
-    public List<ItemDtoExt> getAllItemsOfOwner(@RequestHeader(SHARERUSERID) long id) {
+    public List<ItemDtoExt> getAllItemsOfOwner(@RequestHeader(SharerUserId) long id) {
         return service.getAllItemsOfOwner(id);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoExt getItemById(@RequestHeader(SHARERUSERID) long id, @PathVariable long itemId) {
+    public ItemDtoExt getItemById(@RequestHeader(SharerUserId) long id, @PathVariable long itemId) {
         return service.getItemById(itemId, id);
     }
 
@@ -44,7 +44,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto addComment(@RequestHeader(SHARERUSERID) long userId, @PathVariable long itemId,
+    public CommentDto addComment(@RequestHeader(SharerUserId) long userId, @PathVariable long itemId,
                                  @Valid @RequestBody CommentDto commentDto) {
         return service.addComment(userId, itemId, commentDto);
     }
