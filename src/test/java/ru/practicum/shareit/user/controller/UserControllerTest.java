@@ -27,19 +27,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class UserControllerTest {
 
+    public static final String sharerUserId = "X-Sharer-User-Id";
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper mapper;
-
     @MockBean
     private UserServiceImpl userService;
-
     private UserDto user1Dto;
     private User user1;
     private UserMapper userMapper = new UserMapper();
-    public static final String sharerUserId = "X-Sharer-User-Id";
 
     @BeforeEach
     void beforeEach() {
@@ -90,6 +87,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(user1)));
     }
+
     @Test
     void deleteUserTest() throws Exception {
         when(userService.getUserById(anyLong()))

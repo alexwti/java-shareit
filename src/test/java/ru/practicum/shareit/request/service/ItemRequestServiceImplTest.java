@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request.service;
 
-import org.hibernate.ObjectNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +26,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,18 +35,15 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ItemRequestServiceImplTest {
 
+    private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper();
     @InjectMocks
     private ItemRequestServiceImpl itemRequestService;
-
     @Mock
     private ItemRepository itemRepository;
-
     @Mock
     private ItemRequestRepository requestRepository;
-
     @Mock
     private UserRepository userRepository;
-    private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper();
     private ItemRequestDto itemRequest1Dto;
     private Item item1;
     private User user1;
@@ -108,7 +105,6 @@ class ItemRequestServiceImplTest {
         NotFoundException exception = assertThrows(NotFoundException.class, () -> itemRequestService.createItemRequest(itemRequest1Dto, 3L));
         assertEquals("User not found", exception.getMessage());
     }
-
 
 
     @Test
