@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class BookingControllerTest {
 
-    public static final String SharerUserId = "X-Sharer-User-Id";
+    public static final String sharerUserId = "X-Sharer-User-Id";
     UserMapper userMapper = new UserMapper();
     BookingMapper bookingMapper = new BookingMapper();
     @MockBean
@@ -83,7 +83,7 @@ class BookingControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/bookings")
                         .content(mapper.writeValueAsString(bookingDto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(SharerUserId, userDto.getId()))
+                        .header(sharerUserId, userDto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
 
@@ -96,7 +96,7 @@ class BookingControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/bookings/1")
                         .param("approved", "true")
-                        .header(SharerUserId, userDto.getId()))
+                        .header(sharerUserId, userDto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
 
@@ -109,7 +109,7 @@ class BookingControllerTest {
                 .thenReturn(bookingDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/bookings/1")
-                        .header(SharerUserId, userDto.getId()))
+                        .header(sharerUserId, userDto.getId()))
 
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
@@ -121,7 +121,7 @@ class BookingControllerTest {
                 .thenReturn(List.of(bookingDto));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/bookings")
-                        .header(SharerUserId, userDto.getId()))
+                        .header(sharerUserId, userDto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(bookingDto))));
     }
@@ -132,7 +132,7 @@ class BookingControllerTest {
                 .thenReturn(List.of(bookingDto));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/bookings/owner")
-                        .header(SharerUserId, userDto.getId()))
+                        .header(sharerUserId, userDto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(bookingDto))));
     }

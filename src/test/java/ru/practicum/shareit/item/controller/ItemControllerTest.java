@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ItemController.class)
 class ItemControllerTest {
 
-    private static final String SharerUserId = "X-Sharer-User-Id";
+    private static final String sharerUserId = "X-Sharer-User-Id";
     UserMapper userMapper = new UserMapper();
     ItemMapper itemMapper = new ItemMapper();
     CommentMapper commentMapper = new CommentMapper();
@@ -87,7 +87,7 @@ class ItemControllerTest {
         mockMvc.perform(post("/items")
                         .content(mapper.writeValueAsString(itemDto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(SharerUserId, user1Dto.getId()))
+                        .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemDto)));
     }
@@ -101,7 +101,7 @@ class ItemControllerTest {
         mockMvc.perform(patch("/items/1")
                         .content(mapper.writeValueAsString(itemDto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(SharerUserId, user1Dto.getId()))
+                        .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemDto)));
     }
@@ -111,7 +111,7 @@ class ItemControllerTest {
         when(itemService.getAllItemsOfOwner(anyLong())).thenReturn(List.of(itemDtoExt));
 
         mockMvc.perform(get("/items")
-                        .header(SharerUserId, user1Dto.getId()))
+                        .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(itemDtoExt))));
     }
@@ -122,7 +122,7 @@ class ItemControllerTest {
                 .thenReturn(itemDtoExt);
 
         mockMvc.perform(get("/items/1")
-                        .header(SharerUserId, user1Dto.getId()))
+                        .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemDtoExt)));
     }
@@ -134,7 +134,7 @@ class ItemControllerTest {
 
         mockMvc.perform(get("/items/search")
                         .param("text", "Item")
-                        .header(SharerUserId, user1Dto.getId()))
+                        .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(itemDto))));
     }
@@ -147,7 +147,7 @@ class ItemControllerTest {
         mockMvc.perform(post("/items/1/comment")
                         .content(mapper.writeValueAsString(commentDto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header(SharerUserId, user1Dto.getId()))
+                        .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(commentDto)));
     }
