@@ -21,4 +21,5 @@ public class ItemDtoExt {
     private BookingDto nextBooking;
     private List<CommentDto> comments;
     private long ownerId;
+    private Long requestId;
 }

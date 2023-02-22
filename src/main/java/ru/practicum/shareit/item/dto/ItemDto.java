@@ -8,9 +8,6 @@ import lombok.Setter;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,4 +22,5 @@ public class ItemDto {
     @NotNull(message = "Лоступность должна быть заполнена")
     private Boolean available;
     private long ownerId;
+    private Long requestId;
 }

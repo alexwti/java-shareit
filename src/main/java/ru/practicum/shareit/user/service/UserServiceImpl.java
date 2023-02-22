@@ -12,13 +12,14 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserMapper userMapper;
+    private final UserMapper userMapper = new UserMapper();
     private final UserRepository repository;
 
     @Transactional(readOnly = true)
@@ -74,8 +75,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void deleteUser(long id) {
+    public User deleteUser(long id) {
+        Optional<User> user = repository.findById(id);
         log.info("Пользователь с id {} удалён", id);
         repository.deleteById(id);
+        return user.get();
     }
 }

@@ -17,6 +17,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -30,13 +32,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemMapper itemMapper;
+    private final ItemMapper itemMapper = new ItemMapper();
+    private final ItemRequestRepository itemRequestRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-    private final CommentMapper commentMapper;
+    private final CommentMapper commentMapper = new CommentMapper();
     private final BookingRepository bookingRepository;
-    private final BookingMapper bookingMapper;
+    private final BookingMapper bookingMapper = new BookingMapper();
 
     @Transactional
     @Override
@@ -45,7 +48,13 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Пользователь с id {} не найден", userId);
             throw new NotFoundException("Пользователь не найден");
         });
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElseThrow(() ->
+                    new NotFoundException("Запрос не найден"));
+        }
         Item item = itemMapper.toModel(itemDto);
+        item.setRequest(itemRequest);
         item.setOwnerId(userId);
         log.info("Item created");
         return itemMapper.toModelDto(itemRepository.save(item));

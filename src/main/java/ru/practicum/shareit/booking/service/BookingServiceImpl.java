@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +34,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
-    private final BookingMapper bookingMapper;
+    private final BookingMapper bookingMapper = new BookingMapper();
 
     @Override
     @Transactional
@@ -74,7 +76,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("У вас нет прав на подтверждение аренды этой вещи");
         }
         if (booking.getStatus() == BookingStatus.APPROVED) {
-            log.warn("Резерв {} ужк утвержден", bookingId);
+            log.warn("Резерв {} уже утвержден", bookingId);
             throw new BadRequestException("Вы не можете сменить статус у утвержденного резерва");
         }
         if (approved) {
@@ -96,37 +98,39 @@ public class BookingServiceImpl implements BookingService {
             return bookingMapper.toModelDto(booking);
         } else {
             log.warn("Пользователь id {} не имеет прав работы с резервом {}", userId, bookingId);
-            throw new NotFoundException("У вас нет прав на просмотр сведений обаренде этой вещи");
+            throw new NotFoundException("У вас нет прав на просмотр сведений об аренде этой вещи");
         }
     }
 
     @Override
-    public List<BookingDto> getBookingsByBooker(long bookerId, String state) {
+    public List<BookingDto> getBookingsByBooker(long bookerId, String state, int from, int size) {
         userRepository.findById(bookerId).orElseThrow(() -> {
             log.warn("Пользователь с id {} не найден", bookerId);
             throw new NotFoundException("Пользователь не найден");
         });
 
+        Pageable pageable = PageRequest.of(from / size, size);
+
         List<Booking> bookings = new ArrayList<>();
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
         switch (state) {
             case "ALL":
-                bookings.addAll(bookingRepository.findAllByBookerId(bookerId, sort));
+                bookings.addAll(bookingRepository.findAllByBookerIdOrderByStartDesc(bookerId, pageable));
                 break;
             case "CURRENT":
-                bookings.addAll(bookingRepository.findAllByBookerIdCurrent(bookerId, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByBookerIdCurrent(bookerId, LocalDateTime.now(), pageable));
                 break;
             case "PAST":
-                bookings.addAll(bookingRepository.findAllByBookerIdAndEndBefore(bookerId, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(bookerId, LocalDateTime.now(), pageable));
                 break;
             case "FUTURE":
-                bookings.addAll(bookingRepository.findAllByBookerIdAndStartAfter(bookerId, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(bookerId, LocalDateTime.now(), pageable));
                 break;
             case "WAITING":
-                bookings.addAll(bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.WAITING, sort));
+                bookings.addAll(bookingRepository.findAllByBookerIdAndStatusIsOrderByStartDesc(bookerId, BookingStatus.WAITING, pageable));
                 break;
             case "REJECTED":
-                bookings.addAll(bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.REJECTED, sort));
+                bookings.addAll(bookingRepository.findAllByBookerIdAndStatusIsOrderByStartDesc(bookerId, BookingStatus.REJECTED, pageable));
                 break;
             default:
                 log.warn("Неизестный статус {}", state);
@@ -139,32 +143,33 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingsByOwner(long ownerId, String state) {
+    public List<BookingDto> getBookingsByOwner(long ownerId, String state, int from, int size) {
         userRepository.findById(ownerId).orElseThrow(() -> {
             log.warn("Пользователь с id {} не найден", ownerId);
             throw new NotFoundException("Пользователь не найден");
         });
 
+        Pageable pageable = PageRequest.of(from / size, size);
+
         List<Booking> bookings = new ArrayList<>();
-        Sort sort = Sort.by(Sort.Direction.DESC, "start");
         switch (state) {
             case "ALL":
-                bookings.addAll(bookingRepository.findAllByOwnerId(ownerId, sort));
+                bookings.addAll(bookingRepository.findAllByOwnerId(ownerId, pageable));
                 break;
             case "CURRENT":
-                bookings.addAll(bookingRepository.findAllByOwnerIdCurrent(ownerId, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByOwnerIdCurrent(ownerId, LocalDateTime.now(), pageable));
                 break;
             case "PAST":
-                bookings.addAll(bookingRepository.findAllByOwnerIdAndEndBefore(ownerId, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByOwnerIdAndEndBefore(ownerId, LocalDateTime.now(), pageable));
                 break;
             case "FUTURE":
-                bookings.addAll(bookingRepository.findAllByOwnerIdAndStartAfter(ownerId, LocalDateTime.now(), sort));
+                bookings.addAll(bookingRepository.findAllByOwnerIdAndStartAfter(ownerId, LocalDateTime.now(), pageable));
                 break;
             case "WAITING":
-                bookings.addAll(bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.WAITING, sort));
+                bookings.addAll(bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.WAITING, pageable));
                 break;
             case "REJECTED":
-                bookings.addAll(bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, sort));
+                bookings.addAll(bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, pageable));
                 break;
             default:
                 log.warn("Неизестный статус {}", state);
