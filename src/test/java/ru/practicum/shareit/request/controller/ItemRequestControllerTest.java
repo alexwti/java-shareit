@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ItemRequestControllerTest {
 
-    public static final String SHARER_USER_ID = "X-Sharer-User-Id";
+    public static final String SHARERUSERID = "X-Sharer-User-Id";
     @Autowired
     private final ObjectMapper objectMapper;
     private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper();
@@ -74,7 +74,7 @@ class ItemRequestControllerTest {
         mvc.perform(post("/requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(SHARER_USER_ID, 1L)
+                        .header(SHARERUSERID, 1L)
                         .content(objectMapper.writeValueAsString(itemRequest1Dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
@@ -89,7 +89,7 @@ class ItemRequestControllerTest {
         mvc.perform(get("/requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(SHARER_USER_ID, 1L))
+                        .header(SHARERUSERID, 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].requesterid").value(1L))
@@ -103,7 +103,7 @@ class ItemRequestControllerTest {
         mvc.perform(get("/requests/all")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(SHARER_USER_ID, 1L))
+                        .header(SHARERUSERID, 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(2L))
                 .andExpect(jsonPath("$[0].requesterid").value(2L))
@@ -117,7 +117,7 @@ class ItemRequestControllerTest {
         mvc.perform(get("/requests/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .header(SHARER_USER_ID, 1L))
+                        .header(SHARERUSERID, 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.requesterid").value(1L))

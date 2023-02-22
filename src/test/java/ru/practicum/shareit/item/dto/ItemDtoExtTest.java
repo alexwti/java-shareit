@@ -23,7 +23,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-class itemDtoExtTest {
+class ItemDtoExtTest {
 
     @Autowired
     private JacksonTester<ItemDtoExt> json;

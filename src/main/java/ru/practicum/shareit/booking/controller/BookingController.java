@@ -11,7 +11,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.List;
 
-import static ru.practicum.shareit.item.controller.ItemController.SHARER_USER_ID;
+import static ru.practicum.shareit.item.controller.ItemController.SHARERUSERID;
 
 
 @RestController
@@ -22,27 +22,27 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingDto createBooking(@RequestHeader(SHARER_USER_ID) long userId,
+    public BookingDto createBooking(@RequestHeader(SHARERUSERID) long userId,
                                     @Valid @RequestBody BookingDto bookingDto) {
         bookingDto = bookingService.createBooking(userId, bookingDto);
         return bookingDto;
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto changeBookingStatus(@RequestHeader(SHARER_USER_ID) long userId,
+    public BookingDto changeBookingStatus(@RequestHeader(SHARERUSERID) long userId,
                                           @PathVariable long bookingId,
                                           @RequestParam boolean approved) {
         return bookingService.changeBookingStatus(userId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto getBookingInfo(@RequestHeader(SHARER_USER_ID) long userId,
+    public BookingDto getBookingInfo(@RequestHeader(SHARERUSERID) long userId,
                                      @PathVariable long bookingId) {
         return bookingService.getBookingInfo(userId, bookingId);
     }
 
     @GetMapping
-    public List<BookingDto> getBookingsByBooker(@RequestHeader(SHARER_USER_ID) long bookerId,
+    public List<BookingDto> getBookingsByBooker(@RequestHeader(SHARERUSERID) long bookerId,
                                                 @RequestParam(defaultValue = "ALL", required = false) String state,
                                                 @RequestParam(value = "from", defaultValue = "0") @Min(0) int from,
                                                 @RequestParam(value = "size", defaultValue = "10") @Min(1) @Max(20) int size) {
@@ -50,7 +50,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getBookingsByOwner(@RequestHeader(SHARER_USER_ID) long ownerId,
+    public List<BookingDto> getBookingsByOwner(@RequestHeader(SHARERUSERID) long ownerId,
                                                @RequestParam(defaultValue = "ALL", required = false) String state,
                                                @RequestParam(value = "from", defaultValue = "0") @Min(0) int from,
                                                @RequestParam(value = "size", defaultValue = "10") @Min(1) @Max(20) int size) {
