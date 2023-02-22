@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.service;
 
+import org.hibernate.ObjectNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -21,11 +23,11 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,15 +35,18 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ItemRequestServiceImplTest {
 
-    private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper();
     @InjectMocks
     private ItemRequestServiceImpl itemRequestService;
+
     @Mock
     private ItemRepository itemRepository;
+
     @Mock
     private ItemRequestRepository requestRepository;
+
     @Mock
     private UserRepository userRepository;
+    private final ItemRequestMapper itemRequestMapper = new ItemRequestMapper();
     private ItemRequestDto itemRequest1Dto;
     private Item item1;
     private User user1;
@@ -104,12 +109,33 @@ class ItemRequestServiceImplTest {
         assertEquals("User not found", exception.getMessage());
     }
 
+
+
+    @Test
+    void getForUserRequestsWhenUserFound() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+
+        List<ItemRequestDto> responseList = itemRequestService.getForUserRequests(user1.getId());
+        assertEquals(0, responseList.size());
+        verify(requestRepository).findAllByRequesterIdOrderByCreatedDesc(anyLong());
+    }
+
     @Test
     void getForUserRequestsWhenUserNotFound() {
         when(userRepository.findById(anyLong())).thenThrow(new NotFoundException("User not found"));
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> itemRequestService.getForUserRequests(3L));
         assertEquals("User not found", exception.getMessage());
+    }
+
+    @Test
+    void getForNotForUserRequestsWhenUserFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user1));
+        when(userRepository.findById(2L)).thenReturn(Optional.ofNullable(user2));
+
+        List<ItemRequestDto> responseList = itemRequestService.getNotForUserRequests(user1.getId(), 0, 10);
+        assertEquals(0, responseList.size());
+        verify(requestRepository).findAllByRequesterIdIsNotOrderByCreatedDesc(anyLong(), any(PageRequest.class));
     }
 
     @Test

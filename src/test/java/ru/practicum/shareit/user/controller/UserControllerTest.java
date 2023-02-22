@@ -90,4 +90,13 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(user1)));
     }
+    @Test
+    void deleteUserTest() throws Exception {
+        when(userService.getUserById(anyLong()))
+                .thenReturn(user1);
+
+        mockMvc.perform(delete("/users/1")
+                        .header(sharerUserId, 1L))
+                .andExpect(status().isOk());
+    }
 }
