@@ -19,7 +19,7 @@ public class ItemRequestDto {
     private Long id;
     @NotBlank
     private String description;
-    private Long requester_id;
+    private Long requesterid;
     private LocalDateTime created;
     private List<ItemDto> items;
 }

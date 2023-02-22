@@ -7,7 +7,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import java.util.List;
 
 public interface ItemRequestRepository extends JpaRepository<ItemRequest, Long> {
-    List<ItemRequest> findAllByRequester_IdOrderByCreatedDesc(long userId);
+    List<ItemRequest> findAllByRequesterIdOrderByCreatedDesc(long userId);
 
-    List<ItemRequest> findAllByRequester_IdIsNotOrderByCreatedDesc(Long userId, Pageable pageable);
+    List<ItemRequest> findAllByRequesterIdIsNotOrderByCreatedDesc(Long userId, Pageable pageable);
 }

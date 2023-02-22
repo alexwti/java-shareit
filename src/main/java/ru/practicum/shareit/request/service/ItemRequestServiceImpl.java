@@ -53,7 +53,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
             throw new NotFoundException("Пользователь не найден");
         });
 
-        List<ItemRequestDto> itemRequestsDto = itemRequestRepository.findAllByRequester_IdOrderByCreatedDesc(userId).stream()
+        List<ItemRequestDto> itemRequestsDto = itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(userId).stream()
                 .map(itemRequestMapper::toModelDto)
                 .collect(Collectors.toList());
 
@@ -76,7 +76,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         Pageable pageable = PageRequest.of(from / size, size);
 
-        List<ItemRequestDto> itemRequestsDto = itemRequestRepository.findAllByRequester_IdIsNotOrderByCreatedDesc(userId, pageable).stream()
+        List<ItemRequestDto> itemRequestsDto = itemRequestRepository.findAllByRequesterIdIsNotOrderByCreatedDesc(userId, pageable).stream()
                 .map(itemRequestMapper::toModelDto)
                 .collect(Collectors.toList());
 

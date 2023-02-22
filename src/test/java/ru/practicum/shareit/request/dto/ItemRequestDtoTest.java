@@ -56,16 +56,16 @@ class ItemRequestDtoTest {
         JsonContent<ItemRequestDto> response = json.write(itemRequestDto);
 
         Integer id = Math.toIntExact(itemRequestDto.getId());
-        Integer requestorid = Math.toIntExact(itemRequestDto.getRequester_id());
+        Integer requestorid = Math.toIntExact(itemRequestDto.getRequesterid());
 
         assertThat(response).hasJsonPath("$.id");
-        assertThat(response).hasJsonPath("$.requester_id");
+        assertThat(response).hasJsonPath("$.requesterid");
         assertThat(response).hasJsonPath("$.description");
         assertThat(response).hasJsonPath("$.created");
         assertThat(response).hasJsonPath("$.items");
 
         assertThat(response).extractingJsonPathNumberValue("$.id").isEqualTo(id);
-        assertThat(response).extractingJsonPathNumberValue("$.requester_id").isEqualTo(requestorid);
+        assertThat(response).extractingJsonPathNumberValue("$.requesterid").isEqualTo(requestorid);
         assertThat(response).extractingJsonPathStringValue("$.description")
                 .isEqualTo(itemRequestDto.getDescription());
         assertThat(response).extractingJsonPathArrayValue("$.items").isNotEmpty();

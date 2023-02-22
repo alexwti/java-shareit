@@ -78,7 +78,7 @@ class ItemRequestControllerTest {
                         .content(objectMapper.writeValueAsString(itemRequest1Dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.requester_id").value(1L))
+                .andExpect(jsonPath("$.requesterid").value(1L))
                 .andExpect(jsonPath("$.description").value("ItemRequest1 description"));
     }
 
@@ -92,7 +92,7 @@ class ItemRequestControllerTest {
                         .header(SHARER_USER_ID, 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].requester_id").value(1L))
+                .andExpect(jsonPath("$[0].requesterid").value(1L))
                 .andExpect(jsonPath("$[0].description").value("ItemRequest1 description"));
     }
 
@@ -106,7 +106,7 @@ class ItemRequestControllerTest {
                         .header(SHARER_USER_ID, 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(2L))
-                .andExpect(jsonPath("$[0].requester_id").value(2L))
+                .andExpect(jsonPath("$[0].requesterid").value(2L))
                 .andExpect(jsonPath("$[0].description").value("ItemRequest2 description"));
     }
 
@@ -120,7 +120,7 @@ class ItemRequestControllerTest {
                         .header(SHARER_USER_ID, 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.requester_id").value(1L))
+                .andExpect(jsonPath("$.requesterid").value(1L))
                 .andExpect(jsonPath("$.description").value("ItemRequest1 description"));
     }
 }

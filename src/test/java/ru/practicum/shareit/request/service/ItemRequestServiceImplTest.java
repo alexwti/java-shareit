@@ -131,7 +131,7 @@ class ItemRequestServiceImplTest {
 
         assertEquals(1, responseRequest.getId());
         assertEquals("ItemRequest1 description", responseRequest.getDescription());
-        assertEquals(user1.getId(), responseRequest.getRequester_id());
+        assertEquals(user1.getId(), responseRequest.getRequesterid());
 
 
         assertNotNull(responseRequest);

@@ -68,14 +68,14 @@ class ItemRequestRepositoryTest {
 
     @Test
     void findAllByRequesterIdOrderByCreatedDescTest() {
-        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequester_IdOrderByCreatedDesc(user1.getId());
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(user1.getId());
 
         assertEquals(List.of(itemRequest1), itemRequests);
     }
 
     @Test
     void findAllByRequesterIdIsNotOrderByCreatedDescTest() {
-        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequester_IdIsNotOrderByCreatedDesc(user1.getId(), PageRequest.of(0 / 10, 10));
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdIsNotOrderByCreatedDesc(user1.getId(), PageRequest.of(0 / 10, 10));
 
         assertEquals(List.of(itemRequest2), itemRequests);
     }
