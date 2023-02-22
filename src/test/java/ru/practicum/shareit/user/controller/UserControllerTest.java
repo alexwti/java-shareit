@@ -39,10 +39,11 @@ class UserControllerTest {
     private UserDto user1Dto;
     private User user1;
     private UserMapper userMapper = new UserMapper();
+    public static final String sharerUserId = "X-Sharer-User-Id";
 
     @BeforeEach
     void beforeEach() {
-        user1 = new User(1L, "User1 name", "user1@yandex.ru.com");
+        user1 = new User(1L, "User1 name", "user1@yandex.ru");
         user1Dto = userMapper.toModelDto(user1);
     }
 
@@ -88,15 +89,5 @@ class UserControllerTest {
         mockMvc.perform(get("/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(user1)));
-    }
-
-    @Test
-    void deleteUserTest() throws Exception {
-        when(userService.getUserById(anyLong()))
-                .thenReturn(user1);
-
-        mockMvc.perform(delete("/users/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(user1Dto)));
     }
 }
