@@ -23,6 +23,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -88,41 +89,19 @@ class ItemServiceImplTest {
         user1 = new User(1L, "User1 name", "user1@yandex.ru");
         user2 = new User(2L, "User2 name", "user2@yandex.ru");
 
-        item = Item.builder()
-                .id(1L)
-                .name("Item name")
-                .description("Item description")
-                .available(true)
-                .ownerId(user1.getId())
-                .request(null)
-                .build();
+        item = Item.builder().id(1L).name("Item name").description("Item description").available(true).ownerId(user1.getId()).request(null).build();
 
 
-        booking = Booking.builder()
-                .id(1L)
-                .start(start)
-                .end(end)
-                .item(item)
-                .booker(user2)
-                .status(BookingStatus.WAITING)
-                .build();
+        booking = Booking.builder().id(1L).start(start).end(end).item(item).booker(user2).status(BookingStatus.WAITING).build();
 
-        comment = Comment.builder()
-                .id(1L)
-                .text("Comment text")
-                .item(item)
-                .author(user2)
-                .created(now)
-                .build();
+        comment = Comment.builder().id(1L).text("Comment text").item(item).author(user2).created(now).build();
     }
 
 
     @Test
     void getBookingsOwnerTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user1));
-        when(bookingRepository.findNextBooking(anyLong(), any(LocalDateTime.class)))
-                .thenReturn(Optional.ofNullable(booking));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+        when(bookingRepository.findNextBooking(anyLong(), any(LocalDateTime.class))).thenReturn(Optional.ofNullable(booking));
 
 
         ItemDtoExt itemDtoExt = itemService.getBookings(itemMapper.toModelDtoExt(item), item.getOwnerId());
@@ -134,10 +113,8 @@ class ItemServiceImplTest {
 
     @Test
     void getBookingsNotOwnerTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user2));
-        when(bookingRepository.findNextBooking(anyLong(), any(LocalDateTime.class)))
-                .thenReturn(Optional.ofNullable(null));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user2));
+        when(bookingRepository.findNextBooking(anyLong(), any(LocalDateTime.class))).thenReturn(Optional.ofNullable(null));
 
 
         ItemDtoExt itemDtoExt = itemService.getBookings(itemMapper.toModelDtoExt(item), user2.getId());
@@ -146,12 +123,51 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void getAllItemsOfOwnerTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user1));
+    void itemMapperNullRequesterTest() {
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name("Item")
+                .description("description")
+                .available(true)
+                .ownerId(user1.getId())
+                .requestId(null)
+                .build();
+        Item item1 = itemMapper.toModel(itemDto);
+        assertEquals(null, item1.getRequest());
+    }
 
-        when(repository.findAllByOwnerIdOrderById(anyLong()))
-                .thenReturn(List.of(item));
+    @Test
+    void itemMapperNotNullRequesterTest() {
+        ItemRequest itemRequest = ItemRequest.builder()
+                .id(1L)
+                .description("description")
+                .requester(user1)
+                .created(now)
+                .build();
+
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name("Item")
+                .description("description")
+                .available(true)
+                .ownerId(user1.getId())
+                .requestId(itemRequest.getId())
+                .build();
+
+        Item item1 = itemMapper.toModel(itemDto);
+        assertEquals(itemRequest.getId(), item1.getRequest().getId());
+        assertEquals(null, item1.getRequest().getDescription());
+        assertEquals(null, item1.getRequest().getRequester());
+        assertEquals(null, item1.getRequest().getCreated());
+
+    }
+
+
+    @Test
+    void getAllItemsOfOwnerTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+
+        when(repository.findAllByOwnerIdOrderById(anyLong())).thenReturn(List.of(item));
 
 
         List<ItemDtoExt> itemDtoBooking = itemService.getAllItemsOfOwner(user1.getId());
@@ -164,12 +180,9 @@ class ItemServiceImplTest {
 
     @Test
     void getItemByIdTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
 
-        ItemDtoExt itemDtoExt = itemService.getItemById(
-                item.getId(),
-                user1.getId());
+        ItemDtoExt itemDtoExt = itemService.getItemById(item.getId(), user1.getId());
 
         assertEquals(1, itemDtoExt.getId());
         assertEquals("Item name", itemDtoExt.getName());
@@ -179,8 +192,7 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemWithNameFirstLetterTest() {
-        when(repository.findByNameOrDescriptionLike(anyString()))
-                .thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
 
         List<ItemDto> itemDtos = itemService.searchItem("Item");
 
@@ -195,8 +207,7 @@ class ItemServiceImplTest {
     @Test
     void searchItemWithBlancTextTest() {
 
-        when(repository.findByNameOrDescriptionLike(anyString()))
-                .thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
         List<ItemDto> itemDtos = itemService.searchItem("");
 
         assertEquals(Collections.emptyList(), itemDtos);
@@ -204,8 +215,7 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemWithNameInRandomUpperCaseTest() {
-        when(repository.findByNameOrDescriptionLike(anyString()))
-                .thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
 
         List<ItemDto> itemDtos = itemService.searchItem("iTem");
 
@@ -219,8 +229,7 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemWithDescriptionInRandomUpperCaseTest() {
-        when(repository.findByNameOrDescriptionLike(anyString()))
-                .thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
 
         List<ItemDto> itemDtos = itemService.searchItem("desCription");
 
@@ -234,8 +243,7 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemWithDescriptionInUpperFirstLetterTest() {
-        when(repository.findByNameOrDescriptionLike(anyString()))
-                .thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
 
         List<ItemDto> itemDtos = itemService.searchItem("DESCRIPTION");
 
@@ -249,11 +257,9 @@ class ItemServiceImplTest {
 
     @Test
     void createItemTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user1));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
 
-        when(repository.save(any(Item.class)))
-                .thenReturn(item);
+        when(repository.save(any(Item.class))).thenReturn(item);
 
         ItemDto itemDto = itemService.createItem(item.getId(), itemMapper.toModelDto(item));
 
@@ -266,13 +272,8 @@ class ItemServiceImplTest {
 
     @Test
     void createInappropriateItemWithNoUserTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.empty());
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
-                itemService.createItem(
-                        user1.getId(),
-                        itemMapper.toModelDto(item)
-                ));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemService.createItem(user1.getId(), itemMapper.toModelDto(item)));
         assertThat(exception.getMessage(), is("Пользователь не найден"));
     }
 
@@ -282,35 +283,25 @@ class ItemServiceImplTest {
         ItemDto itemDto = itemMapper.toModelDto(item);
         itemDto.setRequestId(5L);
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
-                itemService.createItem(
-                        user1.getId(),
-                        itemDto
-                ));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemService.createItem(user1.getId(), itemDto));
         assertThat(exception.getMessage(), is("Запрос не найден"));
     }
 
     @Test
     void createItemWithNullItemRequestTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user1));
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
 
         ItemDto itemDto = itemMapper.toModelDto(item);
         itemDto.setRequestId(3000L);
 
-        NotFoundException exc = assertThrows(NotFoundException.class, () ->
-                itemService.createItem(user1.getId(), itemDto)
-        );
+        NotFoundException exc = assertThrows(NotFoundException.class, () -> itemService.createItem(user1.getId(), itemDto));
     }
 
     @Test
     void updateItemTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(repository.save(any(Item.class)))
-                .thenReturn(item);
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class))).thenReturn(item);
 
         ItemDto itemDto = itemService.updateItem(item.getId(), user1.getId(), itemMapper.toModelDto(item));
 
@@ -323,17 +314,10 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemWithEmptyNameTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(repository.save(any(Item.class)))
-                .thenReturn(item);
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class))).thenReturn(item);
 
-        ItemDto itemDto = ItemDto.builder()
-                .id(1L)
-                .name(" ")
-                .description("Item description")
-                .available(true)
-                .build();
+        ItemDto itemDto = ItemDto.builder().id(1L).name(" ").description("Item description").available(true).build();
         ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
 
         assertEquals(1, itemDtoUpd.getId());
@@ -345,17 +329,10 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemWithNullNameTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(repository.save(any(Item.class)))
-                .thenReturn(item);
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class))).thenReturn(item);
 
-        ItemDto itemDto = ItemDto.builder()
-                .id(1L)
-                .name(null)
-                .description("Item description")
-                .available(true)
-                .build();
+        ItemDto itemDto = ItemDto.builder().id(1L).name(null).description("Item description").available(true).build();
         ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
 
         assertEquals(1, itemDtoUpd.getId());
@@ -367,17 +344,10 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemWithEmptyDescriptionTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(repository.save(any(Item.class)))
-                .thenReturn(item);
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class))).thenReturn(item);
 
-        ItemDto itemDto = ItemDto.builder()
-                .id(1L)
-                .name("Item name")
-                .description(" ")
-                .available(true)
-                .build();
+        ItemDto itemDto = ItemDto.builder().id(1L).name("Item name").description(" ").available(true).build();
         ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
 
         assertEquals(1, itemDtoUpd.getId());
@@ -389,17 +359,10 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemWithNullDescriptionTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(repository.save(any(Item.class)))
-                .thenReturn(item);
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class))).thenReturn(item);
 
-        ItemDto itemDto = ItemDto.builder()
-                .id(1L)
-                .name("Item name")
-                .description(null)
-                .available(true)
-                .build();
+        ItemDto itemDto = ItemDto.builder().id(1L).name("Item name").description(null).available(true).build();
         ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
 
         assertEquals(1, itemDtoUpd.getId());
@@ -411,17 +374,10 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemWithNullAviableTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(repository.save(any(Item.class)))
-                .thenReturn(item);
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class))).thenReturn(item);
 
-        ItemDto itemDto = ItemDto.builder()
-                .id(1L)
-                .name("Item name")
-                .description("Item description")
-                .available(null)
-                .build();
+        ItemDto itemDto = ItemDto.builder().id(1L).name("Item name").description("Item description").available(null).build();
         ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
 
         assertEquals(1, itemDtoUpd.getId());
@@ -433,27 +389,29 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemFromNotOwnerTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(repository.save(any(Item.class)))
-                .thenReturn(item);
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class))).thenReturn(item);
 
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemService.updateItem(
-                        50L,
-                        user2.getId(),
-                        itemMapper.toModelDto(item)));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemService.updateItem(50L, user2.getId(), itemMapper.toModelDto(item)));
+        assertThat(exception.getMessage(), is("Вещь у пользователя не найдена"));
+    }
+
+    @Test
+    void updateItemNotFoundTest() {
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(null));
+        when(repository.save(any(Item.class))).thenReturn(item);
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemService.updateItem(user1.getId(), item.getId(), itemMapper.toModelDto(item)));
+        assertThat(exception.getMessage(), is("Вещь не найдена"));
     }
 
     @Test
     void updateItemFromNotUserTest() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException invalidUserIdException;
 
-        invalidUserIdException = Assertions.assertThrows(NotFoundException.class,
-                () -> itemService.getItemById(3L, item.getId()));
-        assertThat(invalidUserIdException.getMessage(), is("Вещь не найдена"));
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> itemService.getItemById(3L, item.getId()));
+        assertThat(exception.getMessage(), is("Вещь не найдена"));
     }
 
     @Test
@@ -462,30 +420,21 @@ class ItemServiceImplTest {
 
         NotFoundException invalidItemIdException;
 
-        invalidItemIdException = Assertions.assertThrows(NotFoundException.class,
-                () -> itemService.getItemById(2L, item.getId()));
+        invalidItemIdException = Assertions.assertThrows(NotFoundException.class, () -> itemService.getItemById(2L, item.getId()));
         assertThat(invalidItemIdException.getMessage(), is("Вещь не найдена"));
     }
 
     @Test
     void addCommentTest() {
-        when(bookingRepository.findByBookerIdAndItemIdAndEndBefore(
-                anyLong(),
-                anyLong(),
-                any(LocalDateTime.class)))
-                .thenReturn(Optional.ofNullable(booking));
+        when(bookingRepository.findByBookerIdAndItemIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class))).thenReturn(Optional.ofNullable(booking));
 
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
 
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user1));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
 
-        when(commentRepository.save(any(Comment.class)))
-                .thenReturn(comment);
+        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-        CommentDto commentDto = itemService
-                .addComment(1L, 1L, commentMapper.toModelDto(comment));
+        CommentDto commentDto = itemService.addComment(1L, 1L, commentMapper.toModelDto(comment));
 
         assertEquals(1, commentDto.getId());
         assertEquals("Comment text", commentDto.getText());
@@ -494,24 +443,13 @@ class ItemServiceImplTest {
 
     @Test
     void createCommentTest() {
-        when(bookingRepository.findByBookerIdAndItemIdAndEndBefore(
-                anyLong(),
-                anyLong(),
-                any(LocalDateTime.class)))
-                .thenReturn(Optional.of(booking));
+        when(bookingRepository.findByBookerIdAndItemIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class))).thenReturn(Optional.of(booking));
 
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(item));
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.ofNullable(user1));
-        when(commentRepository.save(any(Comment.class)))
-                .thenReturn(comment);
+        when(repository.findById(anyLong())).thenReturn(Optional.ofNullable(item));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-        CommentDto commentDto = itemService.addComment(
-                1,
-                1,
-                commentMapper.toModelDto(comment)
-        );
+        CommentDto commentDto = itemService.addComment(1, 1, commentMapper.toModelDto(comment));
 
         assertEquals(1, commentDto.getId());
         assertEquals("Comment text", commentDto.getText());
@@ -520,21 +458,21 @@ class ItemServiceImplTest {
 
     @Test
     void createCommentFromUserWithoutBookingTest() {
-        when(bookingRepository.findByBookerIdAndItemIdAndEndBefore(
-                anyLong(),
-                anyLong(),
-                any(LocalDateTime.class)))
-                .thenReturn(Optional.empty());
+        when(bookingRepository.findByBookerIdAndItemIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class))).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemService.addComment(
-                        1,
-                        1,
-                        commentMapper.toModelDto(comment)
-                ));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemService.addComment(1, 1, commentMapper.toModelDto(comment)));
 
-        assertEquals(
-                "Пользователь не найден",
-                exception.getMessage());
+        assertEquals("Пользователь не найден", exception.getMessage());
     }
+
+    @Test
+    void createCommentFromUserWrongItemTest() {
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemService.addComment(1L, 10L, commentMapper.toModelDto(comment)));
+
+        assertEquals("Вещь не найдена", exception.getMessage());
+    }
+
 }
