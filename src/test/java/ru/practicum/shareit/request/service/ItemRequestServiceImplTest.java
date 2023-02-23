@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -100,10 +104,13 @@ class ItemRequestServiceImplTest {
 
     @Test
     void createItemRequestWhenUserNotFoundTest() {
-        when(userRepository.findById(anyLong())).thenThrow(new NotFoundException("User not found"));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemRequestService.createItemRequest(itemRequest1Dto, 3L));
-        assertEquals("User not found", exception.getMessage());
+        NotFoundException invalidUserIdException;
+
+        invalidUserIdException = Assertions.assertThrows(NotFoundException.class,
+                () -> itemRequestService.createItemRequest(itemRequest1Dto, 3L));
+        assertThat(invalidUserIdException.getMessage(), is("Пользователь не найден"));
     }
 
 
@@ -118,10 +125,13 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getForUserRequestsWhenUserNotFound() {
-        when(userRepository.findById(anyLong())).thenThrow(new NotFoundException("User not found"));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemRequestService.getForUserRequests(3L));
-        assertEquals("User not found", exception.getMessage());
+        NotFoundException invalidUserIdException;
+
+        invalidUserIdException = Assertions.assertThrows(NotFoundException.class,
+                () -> itemRequestService.getForUserRequests(3L));
+        assertThat(invalidUserIdException.getMessage(), is("Пользователь не найден"));
     }
 
     @Test
@@ -136,10 +146,13 @@ class ItemRequestServiceImplTest {
 
     @Test
     void getForNotForUserRequestsWhenUserNotFound() {
-        when(userRepository.findById(anyLong())).thenThrow(new NotFoundException("User not found"));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> itemRequestService.getNotForUserRequests(3L, 0, 10));
-        assertEquals("User not found", exception.getMessage());
+        NotFoundException invalidUserIdException;
+
+        invalidUserIdException = Assertions.assertThrows(NotFoundException.class,
+                () -> itemRequestService.getNotForUserRequests(3L, 0, 10));
+        assertThat(invalidUserIdException.getMessage(), is("Пользователь не найден"));
     }
 
     @Test
@@ -162,22 +175,25 @@ class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getItemRequestWhenRequestNotFoundFoundTest() {
+    void getItemRequestWhenRequestNotFoundTest() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
-        when(requestRepository.findById(anyLong())).thenThrow(new NotFoundException("Request not found"));
+        when(requestRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
-                itemRequestService.getItemRequest(3L, itemRequest1Dto.getId()));
-        assertEquals("Request not found", exception.getMessage());
+        NotFoundException invalidUserIdException;
+
+        invalidUserIdException = Assertions.assertThrows(NotFoundException.class,
+                () -> itemRequestService.getItemRequest(3L, itemRequest1Dto.getId()));
+        assertThat(invalidUserIdException.getMessage(), is("Запрос не найден"));
     }
 
     @Test
-    void getItemRequestWhenUserNotFoundFoundTest() {
-        when(userRepository.findById(anyLong())).thenThrow(new NotFoundException("User not found"));
-        when(requestRepository.findById(anyLong())).thenReturn(Optional.of(itemRequest1));
+    void getItemRequestWhenUserNotFoundTest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () ->
-                itemRequestService.getItemRequest(3L, itemRequest1Dto.getId()));
-        assertEquals("User not found", exception.getMessage());
+        NotFoundException invalidUserIdException;
+
+        invalidUserIdException = Assertions.assertThrows(NotFoundException.class,
+                () -> itemRequestService.getItemRequest(3L, itemRequest1Dto.getId()));
+        assertThat(invalidUserIdException.getMessage(), is("Пользователь не найден"));
     }
 }

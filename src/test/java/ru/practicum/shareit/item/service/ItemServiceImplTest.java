@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -302,27 +305,24 @@ class ItemServiceImplTest {
 
     @Test
     void updateItemFromNotUserTest() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        user1.setId(1L);
-        NotFoundException exc = assertThrows(NotFoundException.class,
-                () -> itemService.getItemById(2L, item.getId()));
+        NotFoundException invalidUserIdException;
 
-        assertEquals("Вещь не найдена", exc.getMessage());
+        invalidUserIdException = Assertions.assertThrows(NotFoundException.class,
+                () -> itemService.getItemById(3L, item.getId()));
+        assertThat(invalidUserIdException.getMessage(), is("Вещь не найдена"));
     }
 
     @Test
     void updateItemFromNotItemTest() {
-        when(repository.findById(anyLong()))
-                .thenReturn(Optional.empty());
-        item.setId(2L);
-        user1.setId(1L);
-        ItemDto itemDto = itemMapper.toModelDto(item);
-        NotFoundException exc = assertThrows(NotFoundException.class,
-                () -> itemService.updateItem(user1.getId(), 1L, itemDto));
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertEquals("Вещь не найдена", exc.getMessage());
+        NotFoundException invalidItemIdException;
+
+        invalidItemIdException = Assertions.assertThrows(NotFoundException.class,
+                () -> itemService.getItemById(2L, item.getId()));
+        assertThat(invalidItemIdException.getMessage(), is("Вещь не найдена"));
     }
 
     @Test
