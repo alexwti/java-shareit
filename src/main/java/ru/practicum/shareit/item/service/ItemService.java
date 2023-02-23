@@ -18,4 +18,8 @@ public interface ItemService {
     ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
 
     CommentDto addComment(long userId, long itemId, CommentDto commentDto);
+
+    ItemDtoExt getBookings(ItemDtoExt itemDtoExt, long userId);
+
+    ItemDtoExt getComments(ItemDtoExt itemDtoExt, long itemId);
 }

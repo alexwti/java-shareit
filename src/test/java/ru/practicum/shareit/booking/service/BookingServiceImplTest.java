@@ -300,8 +300,8 @@ class BookingServiceImplTest {
                 .thenReturn(Optional.ofNullable(user1));
 
         BookingDto bookingDto = bookingService.getBookingInfo(
-                booking.getId(),
-                user1.getId());
+                user1.getId(),
+                booking.getId());
 
         assertEquals(1, bookingDto.getId());
         assertEquals(start, bookingDto.getStart());
@@ -310,6 +310,28 @@ class BookingServiceImplTest {
         assertEquals(user2, bookingDto.getBooker());
         assertEquals(BookingStatus.WAITING, bookingDto.getStatus());
     }
+
+    @Test
+    void getBookingForBookerTest() {
+        when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(booking));
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+
+        booking.setBooker(user1);
+
+        BookingDto bookingDto = bookingService.getBookingInfo(
+                user1.getId(),
+                booking.getId());
+
+        assertEquals(1, bookingDto.getId());
+        assertEquals(start, bookingDto.getStart());
+        assertEquals(end, bookingDto.getEnd());
+        assertEquals(item, bookingDto.getItem());
+        assertEquals(user1, bookingDto.getBooker());
+        assertEquals(BookingStatus.WAITING, bookingDto.getStatus());
+    }
+
 
     @Test
     void getBookingInfoBookingNotFound() {
@@ -401,13 +423,13 @@ class BookingServiceImplTest {
     void getBookingsAfterStateTest() {
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));
-        when(bookingRepository.findAllByOwnerIdAndEndBefore(
+        when(bookingRepository.findAllByBookerIdAndEndIsBeforeOrderByStartDesc(
                 anyLong(),
                 any(LocalDateTime.class),
                 any(PageRequest.class)))
                 .thenReturn(List.of(booking));
 
-        List<BookingDto> bookingDto = bookingService.getBookingsByOwner(user1.getId(),
+        List<BookingDto> bookingDto = bookingService.getBookingsByBooker(user1.getId(),
                 "PAST",
                 0,
                 10);

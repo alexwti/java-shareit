@@ -51,6 +51,82 @@ class UserServiceImplTest {
     }
 
     @Test
+    void updateUserWithEmptyEmailTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(repository.save(any(User.class)))
+                .thenReturn(user1);
+        User user = User.builder()
+                .id(1L)
+                .name("User1 name")
+                .email(" ")
+                .build();
+
+        service.updateUser(user1.getId(), user);
+
+        assertEquals(1, user1.getId());
+        assertEquals("User1 name", user1.getName());
+        assertEquals("user1@yandex.ru", user1.getEmail());
+    }
+
+    @Test
+    void updateUserWithNullEmailTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(repository.save(any(User.class)))
+                .thenReturn(user1);
+        User user = User.builder()
+                .id(1L)
+                .name("User1 name")
+                .email(null)
+                .build();
+
+        service.updateUser(user1.getId(), user);
+
+        assertEquals(1, user1.getId());
+        assertEquals("User1 name", user1.getName());
+        assertEquals("user1@yandex.ru", user1.getEmail());
+    }
+
+    @Test
+    void updateUserWithNullNameTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(repository.save(any(User.class)))
+                .thenReturn(user1);
+        User user = User.builder()
+                .id(1L)
+                .name(null)
+                .email("user1@yandex.ru")
+                .build();
+
+        service.updateUser(user1.getId(), user);
+
+        assertEquals(1, user1.getId());
+        assertEquals("User1 name", user1.getName());
+        assertEquals("user1@yandex.ru", user1.getEmail());
+    }
+
+    @Test
+    void updateUserWithEmptyNameTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(repository.save(any(User.class)))
+                .thenReturn(user1);
+        User user = User.builder()
+                .id(1L)
+                .name(" ")
+                .email("user1@yandex.ru")
+                .build();
+
+        service.updateUser(user1.getId(), user);
+
+        assertEquals(1, user1.getId());
+        assertEquals("User1 name", user1.getName());
+        assertEquals("user1@yandex.ru", user1.getEmail());
+    }
+
+    @Test
     void updateUserWithEmailFormatTest() {
         when(repository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(user1));

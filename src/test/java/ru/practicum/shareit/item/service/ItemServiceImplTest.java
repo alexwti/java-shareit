@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -76,6 +77,7 @@ class ItemServiceImplTest {
     private LocalDateTime now;
     private ItemMapper itemMapper = new ItemMapper();
     private CommentMapper commentMapper = new CommentMapper();
+    private BookingMapper bookingMapper = new BookingMapper();
 
     @BeforeEach
     void beforeEach() {
@@ -112,6 +114,35 @@ class ItemServiceImplTest {
                 .author(user2)
                 .created(now)
                 .build();
+    }
+
+
+    @Test
+    void getBookingsOwnerTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(bookingRepository.findNextBooking(anyLong(), any(LocalDateTime.class)))
+                .thenReturn(Optional.ofNullable(booking));
+
+
+        ItemDtoExt itemDtoExt = itemService.getBookings(itemMapper.toModelDtoExt(item), item.getOwnerId());
+
+        assertEquals(booking.getId(), itemDtoExt.getNextBooking().getId());
+        assertEquals(booking.getStart(), itemDtoExt.getNextBooking().getStart());
+        assertEquals(booking.getEnd(), itemDtoExt.getNextBooking().getEnd());
+    }
+
+    @Test
+    void getBookingsNotOwnerTest() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user2));
+        when(bookingRepository.findNextBooking(anyLong(), any(LocalDateTime.class)))
+                .thenReturn(Optional.ofNullable(null));
+
+
+        ItemDtoExt itemDtoExt = itemService.getBookings(itemMapper.toModelDtoExt(item), user2.getId());
+
+        assertEquals(null, itemDtoExt.getNextBooking());
     }
 
     @Test
@@ -275,7 +306,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateTest() {
+    void updateItemTest() {
         when(repository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(item));
         when(repository.save(any(Item.class)))
@@ -288,6 +319,116 @@ class ItemServiceImplTest {
         assertEquals("Item description", itemDto.getDescription());
         assertEquals(true, itemDto.getAvailable());
         assertNull(itemDto.getRequestId());
+    }
+
+    @Test
+    void updateItemWithEmptyNameTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class)))
+                .thenReturn(item);
+
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name(" ")
+                .description("Item description")
+                .available(true)
+                .build();
+        ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
+
+        assertEquals(1, itemDtoUpd.getId());
+        assertEquals("Item name", itemDtoUpd.getName());
+        assertEquals("Item description", itemDtoUpd.getDescription());
+        assertEquals(true, itemDtoUpd.getAvailable());
+        assertNull(itemDtoUpd.getRequestId());
+    }
+
+    @Test
+    void updateItemWithNullNameTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class)))
+                .thenReturn(item);
+
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name(null)
+                .description("Item description")
+                .available(true)
+                .build();
+        ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
+
+        assertEquals(1, itemDtoUpd.getId());
+        assertEquals("Item name", itemDtoUpd.getName());
+        assertEquals("Item description", itemDtoUpd.getDescription());
+        assertEquals(true, itemDtoUpd.getAvailable());
+        assertNull(itemDtoUpd.getRequestId());
+    }
+
+    @Test
+    void updateItemWithEmptyDescriptionTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class)))
+                .thenReturn(item);
+
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name("Item name")
+                .description(" ")
+                .available(true)
+                .build();
+        ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
+
+        assertEquals(1, itemDtoUpd.getId());
+        assertEquals("Item name", itemDtoUpd.getName());
+        assertEquals("Item description", itemDtoUpd.getDescription());
+        assertEquals(true, itemDtoUpd.getAvailable());
+        assertNull(itemDtoUpd.getRequestId());
+    }
+
+    @Test
+    void updateItemWithNullDescriptionTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class)))
+                .thenReturn(item);
+
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name("Item name")
+                .description(null)
+                .available(true)
+                .build();
+        ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
+
+        assertEquals(1, itemDtoUpd.getId());
+        assertEquals("Item name", itemDtoUpd.getName());
+        assertEquals("Item description", itemDtoUpd.getDescription());
+        assertEquals(true, itemDtoUpd.getAvailable());
+        assertNull(itemDtoUpd.getRequestId());
+    }
+
+    @Test
+    void updateItemWithNullAviableTest() {
+        when(repository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item));
+        when(repository.save(any(Item.class)))
+                .thenReturn(item);
+
+        ItemDto itemDto = ItemDto.builder()
+                .id(1L)
+                .name("Item name")
+                .description("Item description")
+                .available(null)
+                .build();
+        ItemDto itemDtoUpd = itemService.updateItem(itemDto.getId(), user1.getId(), itemDto);
+
+        assertEquals(1, itemDtoUpd.getId());
+        assertEquals("Item name", itemDtoUpd.getName());
+        assertEquals("Item description", itemDtoUpd.getDescription());
+        assertEquals(true, itemDtoUpd.getAvailable());
+        assertNull(itemDtoUpd.getRequestId());
     }
 
     @Test
