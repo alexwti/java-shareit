@@ -242,20 +242,21 @@ class ItemServiceImplTest {
                         user1.getId(),
                         itemMapper.toModelDto(item)
                 ));
+        assertThat(exception.getMessage(), is("Пользователь не найден"));
     }
 
     @Test
-    void createInappropriateItemWithNoRequestIdTest() {
-        item.setRequest(null);
-
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.empty());
+    void createItemWithNoRequestIdTest() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user1));
+        ItemDto itemDto = itemMapper.toModelDto(item);
+        itemDto.setRequestId(5L);
 
         NotFoundException exception = assertThrows(NotFoundException.class, () ->
                 itemService.createItem(
                         user1.getId(),
-                        itemMapper.toModelDto(item)
+                        itemDto
                 ));
+        assertThat(exception.getMessage(), is("Запрос не найден"));
     }
 
     @Test

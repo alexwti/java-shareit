@@ -117,9 +117,11 @@ class ItemRequestServiceImplTest {
     @Test
     void getForUserRequestsWhenUserFound() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
+        when(requestRepository.findAllByRequesterIdOrderByCreatedDesc(user1.getId()))
+                .thenReturn(List.of(itemRequest1));
 
         List<ItemRequestDto> responseList = itemRequestService.getForUserRequests(user1.getId());
-        assertEquals(0, responseList.size());
+        assertEquals(1, responseList.size());
         verify(requestRepository).findAllByRequesterIdOrderByCreatedDesc(anyLong());
     }
 
@@ -138,9 +140,11 @@ class ItemRequestServiceImplTest {
     void getForNotForUserRequestsWhenUserFound() {
         when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user1));
         when(userRepository.findById(2L)).thenReturn(Optional.ofNullable(user2));
+        when(requestRepository.findAllByRequesterIdIsNotOrderByCreatedDesc(user1.getId(), PageRequest.of(0 / 10, 10)))
+                .thenReturn(List.of(itemRequest2));
 
-        List<ItemRequestDto> responseList = itemRequestService.getNotForUserRequests(user1.getId(), 0, 10);
-        assertEquals(0, responseList.size());
+        List<ItemRequestDto> responseList = itemRequestService.getNotForUserRequests(user1.getId(),  0, 10);
+        assertEquals(1, responseList.size());
         verify(requestRepository).findAllByRequesterIdIsNotOrderByCreatedDesc(anyLong(), any(PageRequest.class));
     }
 
