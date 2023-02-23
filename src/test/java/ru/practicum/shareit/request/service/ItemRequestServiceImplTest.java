@@ -143,7 +143,7 @@ class ItemRequestServiceImplTest {
         when(requestRepository.findAllByRequesterIdIsNotOrderByCreatedDesc(user1.getId(), PageRequest.of(0 / 10, 10)))
                 .thenReturn(List.of(itemRequest2));
 
-        List<ItemRequestDto> responseList = itemRequestService.getNotForUserRequests(user1.getId(),  0, 10);
+        List<ItemRequestDto> responseList = itemRequestService.getNotForUserRequests(user1.getId(), 0, 10);
         assertEquals(1, responseList.size());
         verify(requestRepository).findAllByRequesterIdIsNotOrderByCreatedDesc(anyLong(), any(PageRequest.class));
     }

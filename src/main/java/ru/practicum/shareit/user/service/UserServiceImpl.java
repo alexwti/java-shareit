@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.DataExistException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -42,13 +41,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
-        try {
-            User user = repository.save(userMapper.toModel(userDto));
-            log.info("Пользователь {} создан", user);
-            return userMapper.toModelDto(user);
-        } catch (DataExistException e) {
-            throw new DataExistException(String.format("Пользователь с email %s уже есть в базе", userDto.getEmail()));
-        }
+        User user = repository.save(userMapper.toModel(userDto));
+        log.info("Пользователь {} создан", user);
+        return userMapper.toModelDto(user);
     }
 
     @Transactional
@@ -59,11 +54,7 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException("Пользователь не найден");
         });
         if (user.getEmail() != null && !user.getEmail().trim().isEmpty()) {
-            try {
-                updUser.setEmail(user.getEmail());
-            } catch (DataExistException e) {
-                throw new DataExistException(String.format("Пользователь с email %s уже есть в базе", user.getEmail()));
-            }
+            updUser.setEmail(user.getEmail());
         }
         if (user.getName() != null && !user.getName().trim().isEmpty()) {
             updUser.setName(user.getName());

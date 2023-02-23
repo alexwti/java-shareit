@@ -36,7 +36,7 @@ class UserServiceImplTest {
 
     @BeforeEach
     void beforeEach() {
-        user1 = new User(1L, "User1 name", "user1@mail.com");
+        user1 = new User(1L, "User1 name", "user1@yandex.ru");
     }
 
     @Test
@@ -47,9 +47,8 @@ class UserServiceImplTest {
 
         assertEquals(1, userDto.getId());
         assertEquals("User1 name", userDto.getName());
-        assertEquals("user1@mail.com", userDto.getEmail());
+        assertEquals("user1@yandex.ru", userDto.getEmail());
     }
-
 
     @Test
     void updateUserWithEmailFormatTest() {
@@ -62,7 +61,7 @@ class UserServiceImplTest {
 
         assertEquals(1, user1.getId());
         assertEquals("User1 name", user1.getName());
-        assertEquals("user1@mail.com", user1.getEmail());
+        assertEquals("user1@yandex.ru", user1.getEmail());
     }
 
     @Test
@@ -90,16 +89,16 @@ class UserServiceImplTest {
 
         assertEquals(1, user1.getId());
         assertEquals("User1 name", user1.getName());
-        assertEquals("user1@mail.com", user1.getEmail());
+        assertEquals("user1@yandex.ru", user1.getEmail());
     }
 
     @Test
     void getAllUsersWhenUserFoundThenUserNotFoundExceptionThrown() {
         long userId = 0L;
-        //    User expectedUser = new User();
         when(repository.findById(userId))
                 .thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> service.getUserById(userId));
+        NotFoundException exc = assertThrows(NotFoundException.class, () -> service.getUserById(userId));
+        assertEquals("Пользователь не найден", exc.getMessage());
     }
 
     @Test
@@ -111,7 +110,7 @@ class UserServiceImplTest {
 
         assertEquals(1, user.getId());
         assertEquals("User1 name", user.getName());
-        assertEquals("user1@mail.com", user.getEmail());
+        assertEquals("user1@yandex.ru", user.getEmail());
     }
 
     @Test
@@ -134,7 +133,7 @@ class UserServiceImplTest {
 
         assertEquals(1, user.getId());
         assertEquals("User1 name", user.getName());
-        assertEquals("user1@mail.com", user.getEmail());
+        assertEquals("user1@yandex.ru", user.getEmail());
     }
 
     @Test
@@ -159,6 +158,6 @@ class UserServiceImplTest {
         assertEquals(1, user.size());
         assertEquals(1, user.get(0).getId());
         assertEquals("User1 name", user.get(0).getName());
-        assertEquals("user1@mail.com", user.get(0).getEmail());
+        assertEquals("user1@yandex.ru", user.get(0).getEmail());
     }
 }
