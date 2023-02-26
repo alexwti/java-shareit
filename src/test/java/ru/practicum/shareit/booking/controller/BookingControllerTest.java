@@ -75,7 +75,7 @@ class BookingControllerTest {
         when(bookingService.changeBookingStatus(anyLong(), anyLong(), anyBoolean())).thenReturn(bookingDto);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/bookings/1")
-                .param("approved", "true").header(sharerUserId, userDto.getId()))
+                        .param("approved", "true").header(sharerUserId, userDto.getId()))
                 .andExpect(status().isOk()).andExpect(content().json(mapper.writeValueAsString(bookingDto)));
         verify(bookingService, times(1)).changeBookingStatus(anyLong(), anyLong(), anyBoolean());
     }

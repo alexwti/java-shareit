@@ -41,9 +41,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
-            User user = repository.save(userMapper.toModel(userDto));
-            log.info("Пользователь {} создан", user);
-            return userMapper.toModelDto(user);
+        User user = repository.save(userMapper.toModel(userDto));
+        log.info("Пользователь {} создан", user);
+        return userMapper.toModelDto(user);
     }
 
     @Transactional
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException("Пользователь не найден");
         });
         if (user.getEmail() != null && !user.getEmail().trim().isEmpty()) {
-                updUser.setEmail(user.getEmail());
+            updUser.setEmail(user.getEmail());
         }
         if (user.getName() != null && !user.getName().trim().isEmpty()) {
             updUser.setName(user.getName());

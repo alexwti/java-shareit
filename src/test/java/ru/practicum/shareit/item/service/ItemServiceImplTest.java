@@ -218,7 +218,7 @@ class ItemServiceImplTest {
     void searchItemWithNameInRandomUpperCaseTest() {
         when(repository.findByNameOrDescriptionLike(anyString(), any(PageRequest.class))).thenReturn(List.of(item));
 
-        List<ItemDto> itemDtos = itemService.searchItem("iTem", 0,10);
+        List<ItemDto> itemDtos = itemService.searchItem("iTem", 0, 10);
 
         assertEquals(1, itemDtos.size());
         assertEquals(1, itemDtos.get(0).getId());

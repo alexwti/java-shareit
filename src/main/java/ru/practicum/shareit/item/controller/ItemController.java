@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -35,8 +34,7 @@ public class ItemController {
     public List<ItemDtoExt> getAllItemsOfOwner(
             @RequestHeader(sharerUserId) long id,
             @RequestParam(value = "from", defaultValue = "0") @Min(0) int from,
-            @RequestParam(value = "size", defaultValue = "10") @Min(1) @Max(20) int size)
-    {
+            @RequestParam(value = "size", defaultValue = "10") @Min(1) @Max(20) int size) {
         return service.getAllItemsOfOwner(id, from, size);
     }
 
@@ -48,8 +46,7 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemDto> searchItem(@RequestParam String text,
                                     @RequestParam(value = "from", defaultValue = "0") @Min(0) int from,
-                                    @RequestParam(value = "size", defaultValue = "10") @Min(1) @Max(20) int size)
-    {
+                                    @RequestParam(value = "size", defaultValue = "10") @Min(1) @Max(20) int size) {
         return service.searchItem(text, from, size);
     }
 
