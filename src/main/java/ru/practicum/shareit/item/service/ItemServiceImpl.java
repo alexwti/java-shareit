@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -115,19 +117,21 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDtoExt> getAllItemsOfOwner(long userId) {
+    public List<ItemDtoExt> getAllItemsOfOwner(long userId, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size);
         log.info("Вещь пользователя с id {} выгружены", userId);
-        return itemRepository.findAllByOwnerIdOrderById(userId).stream().map(itemMapper::toModelDtoExt).map(itemDtoExt -> getBookings(itemDtoExt, userId)).collect(Collectors.toList());
+        return itemRepository.findAllByOwnerIdOrderById(userId, pageable).stream().map(itemMapper::toModelDtoExt).map(itemDtoExt -> getBookings(itemDtoExt, userId)).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> searchItem(String text) {
+    public List<ItemDto> searchItem(String text, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size);
         log.info("Выдан результат поиска вещи {}", text);
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.findByNameOrDescriptionLike(text.toLowerCase()).stream().map(itemMapper::toModelDto).collect(Collectors.toList());
+        return itemRepository.findByNameOrDescriptionLike(text.toLowerCase(), pageable).stream().map(itemMapper::toModelDto).collect(Collectors.toList());
     }
 
     @Override

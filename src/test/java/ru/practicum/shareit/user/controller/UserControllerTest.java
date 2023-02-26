@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +54,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(user1Dto)));
+        verify(userService, times(1))
+                .createUser(any(UserDto.class));
     }
 
     @Test
@@ -66,6 +68,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(user1)));
+        verify(userService, times(1))
+                .updateUser(anyLong(), any(User.class));
     }
 
     @Test
@@ -76,6 +80,8 @@ class UserControllerTest {
         mockMvc.perform(get("/users/"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(user1))));
+        verify(userService, times(1))
+                .findAll();
     }
 
     @Test
@@ -86,6 +92,8 @@ class UserControllerTest {
         mockMvc.perform(get("/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(user1)));
+        verify(userService, times(1))
+                .getUserById(anyLong());
     }
 
     @Test
@@ -96,5 +104,7 @@ class UserControllerTest {
         mockMvc.perform(delete("/users/1")
                         .header(sharerUserId, 1L))
                 .andExpect(status().isOk());
+        verify(userService, times(1))
+                .deleteUser(anyLong());
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -69,7 +70,8 @@ class ItemRequestControllerTest {
 
     @Test
     void createItemRequestTest() throws Exception {
-        when(itemRequestService.createItemRequest(any(), anyLong())).thenReturn(itemRequest1Dto);
+        when(itemRequestService.createItemRequest(any(), anyLong()))
+                .thenReturn(itemRequest1Dto);
 
         mvc.perform(post("/requests")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -80,11 +82,14 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.requesterid").value(1L))
                 .andExpect(jsonPath("$.description").value("ItemRequest1 description"));
+        verify(itemRequestService, times(1))
+                .createItemRequest(any(), anyLong());
     }
 
     @Test
     void getForUserRequestsTest() throws Exception {
-        when(itemRequestService.getForUserRequests(anyLong())).thenReturn(Collections.singletonList(itemRequest1Dto));
+        when(itemRequestService.getForUserRequests(anyLong()))
+                .thenReturn(Collections.singletonList(itemRequest1Dto));
 
         mvc.perform(get("/requests")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,11 +99,14 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].requesterid").value(1L))
                 .andExpect(jsonPath("$[0].description").value("ItemRequest1 description"));
+        verify(itemRequestService, times(1))
+                .getForUserRequests(anyLong());
     }
 
     @Test
     void getNotForUserRequestsTest() throws Exception {
-        when(itemRequestService.getNotForUserRequests(anyLong(), anyInt(), anyInt())).thenReturn(Collections.singletonList(itemRequest2Dto));
+        when(itemRequestService.getNotForUserRequests(anyLong(), anyInt(), anyInt()))
+                .thenReturn(Collections.singletonList(itemRequest2Dto));
 
         mvc.perform(get("/requests/all")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,11 +116,14 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[0].id").value(2L))
                 .andExpect(jsonPath("$[0].requesterid").value(2L))
                 .andExpect(jsonPath("$[0].description").value("ItemRequest2 description"));
+        verify(itemRequestService, times(1))
+                .getNotForUserRequests(anyLong(), anyInt(), anyInt());
     }
 
     @Test
     void getItemRequestTest() throws Exception {
-        when(itemRequestService.getItemRequest(anyLong(), anyLong())).thenReturn(itemRequest1Dto);
+        when(itemRequestService.getItemRequest(anyLong(), anyLong()))
+                .thenReturn(itemRequest1Dto);
 
         mvc.perform(get("/requests/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -122,5 +133,7 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.requesterid").value(1L))
                 .andExpect(jsonPath("$.description").value("ItemRequest1 description"));
+        verify(itemRequestService, times(1))
+                .getItemRequest(anyLong(), anyLong());
     }
 }

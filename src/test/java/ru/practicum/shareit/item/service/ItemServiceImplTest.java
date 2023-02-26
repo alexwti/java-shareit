@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -167,10 +168,10 @@ class ItemServiceImplTest {
     void getAllItemsOfOwnerTest() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user1));
 
-        when(repository.findAllByOwnerIdOrderById(anyLong())).thenReturn(List.of(item));
+        when(repository.findAllByOwnerIdOrderById(anyLong(), any(PageRequest.class))).thenReturn(List.of(item));
 
 
-        List<ItemDtoExt> itemDtoBooking = itemService.getAllItemsOfOwner(user1.getId());
+        List<ItemDtoExt> itemDtoBooking = itemService.getAllItemsOfOwner(user1.getId(), 0, 10);
 
         assertEquals(1, itemDtoBooking.size());
         assertEquals(1, itemDtoBooking.get(0).getId());
@@ -192,9 +193,9 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemWithNameFirstLetterTest() {
-        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString(), any(PageRequest.class))).thenReturn(List.of(item));
 
-        List<ItemDto> itemDtos = itemService.searchItem("Item");
+        List<ItemDto> itemDtos = itemService.searchItem("Item", 0, 10);
 
         assertEquals(1, itemDtos.size());
         assertEquals(1, itemDtos.get(0).getId());
@@ -207,17 +208,17 @@ class ItemServiceImplTest {
     @Test
     void searchItemWithBlancTextTest() {
 
-        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
-        List<ItemDto> itemDtos = itemService.searchItem("");
+        when(repository.findByNameOrDescriptionLike(anyString(), any(PageRequest.class))).thenReturn(List.of(item));
+        List<ItemDto> itemDtos = itemService.searchItem("", 0, 10);
 
         assertEquals(Collections.emptyList(), itemDtos);
     }
 
     @Test
     void searchItemWithNameInRandomUpperCaseTest() {
-        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString(), any(PageRequest.class))).thenReturn(List.of(item));
 
-        List<ItemDto> itemDtos = itemService.searchItem("iTem");
+        List<ItemDto> itemDtos = itemService.searchItem("iTem", 0,10);
 
         assertEquals(1, itemDtos.size());
         assertEquals(1, itemDtos.get(0).getId());
@@ -229,9 +230,9 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemWithDescriptionInRandomUpperCaseTest() {
-        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString(), any(PageRequest.class))).thenReturn(List.of(item));
 
-        List<ItemDto> itemDtos = itemService.searchItem("desCription");
+        List<ItemDto> itemDtos = itemService.searchItem("desCription", 0, 10);
 
         assertEquals(1, itemDtos.size());
         assertEquals(1, itemDtos.get(0).getId());
@@ -243,9 +244,9 @@ class ItemServiceImplTest {
 
     @Test
     void searchItemWithDescriptionInUpperFirstLetterTest() {
-        when(repository.findByNameOrDescriptionLike(anyString())).thenReturn(List.of(item));
+        when(repository.findByNameOrDescriptionLike(anyString(), any(PageRequest.class))).thenReturn(List.of(item));
 
-        List<ItemDto> itemDtos = itemService.searchItem("DESCRIPTION");
+        List<ItemDto> itemDtos = itemService.searchItem("DESCRIPTION", 0, 10);
 
         assertEquals(1, itemDtos.size());
         assertEquals(1, itemDtos.get(0).getId());

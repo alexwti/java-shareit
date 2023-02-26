@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -90,6 +90,8 @@ class ItemControllerTest {
                         .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemDto)));
+        verify(itemService, times(1))
+                .createItem(anyLong(), any(ItemDto.class));
     }
 
 
@@ -104,16 +106,21 @@ class ItemControllerTest {
                         .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemDto)));
+        verify(itemService, times(1))
+                .updateItem(anyLong(), anyLong(), any(ItemDto.class));
     }
 
     @Test
     void getAllItemsOfOwnerTest() throws Exception {
-        when(itemService.getAllItemsOfOwner(anyLong())).thenReturn(List.of(itemDtoExt));
+        when(itemService.getAllItemsOfOwner(anyLong(), anyInt(), anyInt()))
+                .thenReturn(List.of(itemDtoExt));
 
         mockMvc.perform(get("/items")
                         .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(itemDtoExt))));
+        verify(itemService, times(1))
+                .getAllItemsOfOwner(anyLong(), anyInt(), anyInt());
     }
 
     @Test
@@ -125,11 +132,13 @@ class ItemControllerTest {
                         .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(itemDtoExt)));
+        verify(itemService, times(1))
+                .getItemById(anyLong(), anyLong());
     }
 
     @Test
     void searchItemTest() throws Exception {
-        when(itemService.searchItem(anyString()))
+        when(itemService.searchItem(anyString(), anyInt(), anyInt()))
                 .thenReturn(List.of(itemDto));
 
         mockMvc.perform(get("/items/search")
@@ -137,6 +146,8 @@ class ItemControllerTest {
                         .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(List.of(itemDto))));
+        verify(itemService, times(1))
+                .searchItem(anyString(), anyInt(), anyInt());
     }
 
     @Test
@@ -150,5 +161,7 @@ class ItemControllerTest {
                         .header(sharerUserId, user1Dto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(commentDto)));
+        verify(itemService, times(1))
+                .addComment(anyLong(), anyLong(), any(CommentDto.class));
     }
 }

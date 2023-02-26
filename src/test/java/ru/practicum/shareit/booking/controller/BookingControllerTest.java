@@ -55,64 +55,39 @@ class BookingControllerTest {
         User user2 = new User(2L, "User2 name", "user2@yandex.ru");
         userDto = userMapper.toModelDto(user1);
 
-        Item item = Item.builder()
-                .id(1L)
-                .name("Item name")
-                .description("Item description")
-                .available(true)
-                .ownerId(user1.getId())
-                .request(null)
-                .build();
+        Item item = Item.builder().id(1L).name("Item name").description("Item description").available(true).ownerId(user1.getId()).request(null).build();
 
-        Booking booking = Booking.builder()
-                .id(1L)
-                .start(start)
-                .end(end)
-                .item(item)
-                .booker(user1)
-                .status(BookingStatus.WAITING)
-                .build();
+        Booking booking = Booking.builder().id(1L).start(start).end(end).item(item).booker(user1).status(BookingStatus.WAITING).build();
         bookingDto = bookingMapper.toModelDto(booking);
     }
 
     @Test
     void createBookingTest() throws Exception {
-        when(bookingService.createBooking(anyLong(), any(BookingDto.class)))
-                .thenReturn(bookingDto);
+        when(bookingService.createBooking(anyLong(), any(BookingDto.class))).thenReturn(bookingDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/bookings")
-                        .content(mapper.writeValueAsString(bookingDto))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(sharerUserId, userDto.getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
+        mockMvc.perform(MockMvcRequestBuilders.post("/bookings").content(mapper.writeValueAsString(bookingDto)).contentType(MediaType.APPLICATION_JSON).header(sharerUserId, userDto.getId())).andExpect(status().isOk()).andExpect(content().json(mapper.writeValueAsString(bookingDto)));
 
+        verify(bookingService, times(1)).createBooking(anyLong(), any(BookingDto.class));
     }
 
     @Test
     void changeBookingStatusTest() throws Exception {
-        when(bookingService.changeBookingStatus(anyLong(), anyLong(), anyBoolean()))
-                .thenReturn(bookingDto);
+        when(bookingService.changeBookingStatus(anyLong(), anyLong(), anyBoolean())).thenReturn(bookingDto);
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/bookings/1")
-                        .param("approved", "true")
-                        .header(sharerUserId, userDto.getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
-
-
+                .param("approved", "true").header(sharerUserId, userDto.getId()))
+                .andExpect(status().isOk()).andExpect(content().json(mapper.writeValueAsString(bookingDto)));
+        verify(bookingService, times(1)).changeBookingStatus(anyLong(), anyLong(), anyBoolean());
     }
 
     @Test
     void getBookingInfoTest() throws Exception {
-        when(bookingService.getBookingInfo(anyLong(), anyLong()))
-                .thenReturn(bookingDto);
+        when(bookingService.getBookingInfo(anyLong(), anyLong())).thenReturn(bookingDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/bookings/1")
-                        .header(sharerUserId, userDto.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/bookings/1").header(sharerUserId, userDto.getId()))
 
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookingDto)));
+                .andExpect(status().isOk()).andExpect(content().json(mapper.writeValueAsString(bookingDto)));
+        verify(bookingService, times(1)).getBookingInfo(anyLong(), anyLong());
     }
 
     @Test
@@ -120,10 +95,10 @@ class BookingControllerTest {
         when(bookingService.getBookingsByBooker(anyLong(), any(String.class), anyInt(), anyInt()))
                 .thenReturn(List.of(bookingDto));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/bookings")
-                        .header(sharerUserId, userDto.getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(List.of(bookingDto))));
+        mockMvc.perform(MockMvcRequestBuilders.get("/bookings").header(sharerUserId, userDto.getId()))
+                .andExpect(status().isOk()).andExpect(content().json(mapper.writeValueAsString(List.of(bookingDto))));
+        verify(bookingService, times(1))
+                .getBookingsByBooker(anyLong(), any(String.class), anyInt(), anyInt());
     }
 
     @Test
@@ -131,9 +106,9 @@ class BookingControllerTest {
         when(bookingService.getBookingsByOwner(anyLong(), any(String.class), anyInt(), anyInt()))
                 .thenReturn(List.of(bookingDto));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/bookings/owner")
-                        .header(sharerUserId, userDto.getId()))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(List.of(bookingDto))));
+        mockMvc.perform(MockMvcRequestBuilders.get("/bookings/owner").header(sharerUserId, userDto.getId()))
+                .andExpect(status().isOk()).andExpect(content().json(mapper.writeValueAsString(List.of(bookingDto))));
+        verify(bookingService, times(1))
+                .getBookingsByOwner(anyLong(), any(String.class), anyInt(), anyInt());
     }
 }

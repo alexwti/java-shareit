@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -37,7 +39,6 @@ class ItemRepositoryTest {
     private ItemRequestRepository itemRequestRepository;
 
     private User user1;
-    private User user2;
 
     private Item item;
     private ItemRequest itemRequest;
@@ -47,7 +48,7 @@ class ItemRepositoryTest {
         LocalDateTime now = LocalDateTime.now();
 
         user1 = new User(null, "User1 name", "user1@yandex.ru");
-        user2 = new User(null, "User2 name", "user2@yandex.ru");
+        User user2 = new User(null, "User2 name", "user2@yandex.ru");
         em.persist(user1);
         em.persist(user2);
 
@@ -79,7 +80,8 @@ class ItemRepositoryTest {
 
     @Test
     void findAllByOwnerIdOrderByIdTest() {
-        List<Item> items = itemRepository.findAllByOwnerIdOrderById(user1.getId());
+        PageRequest pg = PageRequest.of(0, 10);
+        List<Item> items = itemRepository.findAllByOwnerIdOrderById(user1.getId(), pg);
         List<Item> items1 = new ArrayList<>();
         items1.add(item);
 
@@ -92,7 +94,8 @@ class ItemRepositoryTest {
     void findByDescriptionLikeTest() {
 
         String text = "description";
-        List<Item> items = itemRepository.findByNameOrDescriptionLike(text);
+        PageRequest pg = PageRequest.of(0, 10);
+        List<Item> items = itemRepository.findByNameOrDescriptionLike(text, pg);
 
         assertEquals(List.of(item).size(), items.size());
         assertEquals(item.getId(), items.get(0).getId());
@@ -102,8 +105,8 @@ class ItemRepositoryTest {
     @Test
     void findByNameLikeTest() {
         String text = "name";
-
-        List<Item> items = itemRepository.findByNameOrDescriptionLike(text);
+        PageRequest pg = PageRequest.of(0, 10);
+        List<Item> items = itemRepository.findByNameOrDescriptionLike(text, pg);
 
         assertEquals(List.of(item).size(), items.size());
         assertEquals(item.getId(), items.get(0).getId());
