@@ -1,20 +1,15 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 
 public class ItemDto {
     private long id;
@@ -25,4 +20,5 @@ public class ItemDto {
     @NotNull(message = "Лоступность должна быть заполнена")
     private Boolean available;
     private long ownerId;
+    private Long requestId;
 }

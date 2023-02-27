@@ -4,9 +4,11 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoExt;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.util.BaseMapper;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Component
 public class ItemMapper implements BaseMapper<ItemDto, Item> {
@@ -17,7 +19,8 @@ public class ItemMapper implements BaseMapper<ItemDto, Item> {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getOwnerId()
+                item.getOwnerId(),
+                Optional.ofNullable(item.getRequest()).map(ItemRequest::getId).orElse(null)
         );
     }
 
@@ -27,7 +30,9 @@ public class ItemMapper implements BaseMapper<ItemDto, Item> {
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
-                itemDto.getOwnerId());
+                itemDto.getOwnerId(),
+                itemDto.getRequestId() == null ? null : ItemRequest.builder().id(itemDto.getRequestId()).build()
+        );
     }
 
     public ItemDtoExt toModelDtoExt(Item item) {
@@ -38,6 +43,8 @@ public class ItemMapper implements BaseMapper<ItemDto, Item> {
                 null,
                 null,
                 new ArrayList<>(),
-                item.getOwnerId());
+                item.getOwnerId(),
+                Optional.ofNullable(item.getRequest()).map(ItemRequest::getId).orElse(null)
+        );
     }
 }

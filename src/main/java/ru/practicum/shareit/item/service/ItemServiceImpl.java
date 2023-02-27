@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -17,6 +19,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -30,13 +34,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemMapper itemMapper;
+    private final ItemMapper itemMapper = new ItemMapper();
+    private final ItemRequestRepository itemRequestRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-    private final CommentMapper commentMapper;
+    private final CommentMapper commentMapper = new CommentMapper();
     private final BookingRepository bookingRepository;
-    private final BookingMapper bookingMapper;
+    private final BookingMapper bookingMapper = new BookingMapper();
 
     @Transactional
     @Override
@@ -45,7 +50,12 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Пользователь с id {} не найден", userId);
             throw new NotFoundException("Пользователь не найден");
         });
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElseThrow(() -> new NotFoundException("Запрос не найден"));
+        }
         Item item = itemMapper.toModel(itemDto);
+        item.setRequest(itemRequest);
         item.setOwnerId(userId);
         log.info("Item created");
         return itemMapper.toModelDto(itemRepository.save(item));
@@ -89,8 +99,7 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Вещь с id {} не найдена", itemId);
             throw new NotFoundException("Вещь не найдена");
         });
-        bookingRepository.findByBookerIdAndItemIdAndEndBefore(userId, itemId, LocalDateTime.now())
-                .orElseThrow(() -> new BadRequestException("У вас нет прав комментировать эту вещь"));
+        bookingRepository.findByBookerIdAndItemIdAndEndBefore(userId, itemId, LocalDateTime.now()).orElseThrow(() -> new BadRequestException("У вас нет прав комментировать эту вещь"));
         Comment comment = commentMapper.toModel(user, item, commentDto);
         return commentMapper.toModelDto(commentRepository.save(comment));
     }
@@ -108,36 +117,28 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDtoExt> getAllItemsOfOwner(long userId) {
+    public List<ItemDtoExt> getAllItemsOfOwner(long userId, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size);
         log.info("Вещь пользователя с id {} выгружены", userId);
-        return itemRepository.findAllByOwnerIdOrderById(userId).stream()
-                .map(itemMapper::toModelDtoExt)
-                .map(itemDtoExt -> getBookings(itemDtoExt, userId))
-                .collect(Collectors.toList());
+        return itemRepository.findAllByOwnerIdOrderById(userId, pageable).stream().map(itemMapper::toModelDtoExt).map(itemDtoExt -> getBookings(itemDtoExt, userId)).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> searchItem(String text) {
+    public List<ItemDto> searchItem(String text, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size);
         log.info("Выдан результат поиска вещи {}", text);
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.findByNameOrDescriptionLike(text.toLowerCase()).stream()
-                .map(itemMapper::toModelDto)
-                .collect(Collectors.toList());
+        return itemRepository.findByNameOrDescriptionLike(text.toLowerCase(), pageable).stream().map(itemMapper::toModelDto).collect(Collectors.toList());
     }
 
-    private ItemDtoExt getBookings(ItemDtoExt itemDtoExt, long userId) {
+    @Override
+    public ItemDtoExt getBookings(ItemDtoExt itemDtoExt, long userId) {
         if (itemDtoExt.getOwnerId() == userId) {
-            itemDtoExt.setLastBooking(
-                    bookingRepository.findLastBooking(
-                            itemDtoExt.getId(), LocalDateTime.now()
-                    ).map(bookingMapper::toModelDto).orElse(null));
-            itemDtoExt.setNextBooking(
-                    bookingRepository.findNextBooking(
-                            itemDtoExt.getId(), LocalDateTime.now()
-                    ).map(bookingMapper::toModelDto).orElse(null));
+            itemDtoExt.setLastBooking(bookingRepository.findLastBooking(itemDtoExt.getId(), LocalDateTime.now()).map(bookingMapper::toModelDto).orElse(null));
+            itemDtoExt.setNextBooking(bookingRepository.findNextBooking(itemDtoExt.getId(), LocalDateTime.now()).map(bookingMapper::toModelDto).orElse(null));
         } else {
             itemDtoExt.setLastBooking(null);
             itemDtoExt.setNextBooking(null);
@@ -145,10 +146,9 @@ public class ItemServiceImpl implements ItemService {
         return itemDtoExt;
     }
 
-    private ItemDtoExt getComments(ItemDtoExt itemDtoExt, long itemId) {
-        List<CommentDto> commentDto = commentRepository.findAllByItemId(itemId).stream()
-                .map(commentMapper::toModelDto)
-                .collect(Collectors.toList());
+    @Override
+    public ItemDtoExt getComments(ItemDtoExt itemDtoExt, long itemId) {
+        List<CommentDto> commentDto = commentRepository.findAllByItemId(itemId).stream().map(commentMapper::toModelDto).collect(Collectors.toList());
         itemDtoExt.setComments(commentDto);
         return itemDtoExt;
     }
