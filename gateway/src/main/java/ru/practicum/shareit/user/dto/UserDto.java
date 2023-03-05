@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.shareit.common.Create;
+import ru.practicum.shareit.common.Update;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -17,10 +19,10 @@ public class UserDto {
 
     private long id;
 
-    @NotBlank(message = "Имя должно быть заполнено")
+    @NotBlank(groups = Create.class)
     private String name;
 
-    @NotNull(message = "EMail должен быть заполнен")
-    @Email(message = "EMail не соответствует шаблону")
+    @NotNull(groups = Create.class)
+    @Email(groups = {Create.class, Update.class})
     private String email;
 }

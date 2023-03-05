@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.common.Create;
 import ru.practicum.shareit.request.client.RequestClient;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -21,7 +21,8 @@ public class ItemRequestController {
     private final String sharerUserId = "X-Sharer-User-Id";
 
     @PostMapping
-    public ResponseEntity<Object> createItemRequest(@RequestHeader(sharerUserId) Long userId, @Valid @RequestBody ItemRequestDto itemRequestDto) {
+    public ResponseEntity<Object> createItemRequest(@RequestHeader(sharerUserId) Long userId,
+                                                    @Validated(Create.class) @RequestBody ItemRequestDto itemRequestDto) {
         return requestClient.createItemRequest(userId, itemRequestDto);
     }
 

@@ -2,12 +2,14 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.common.Create;
+import ru.practicum.shareit.common.Update;
 import ru.practicum.shareit.item.client.ItemClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -20,12 +22,14 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @PostMapping
-    public ResponseEntity<Object> createItem(@RequestHeader(sharerUserId) long userId, @Valid @RequestBody ItemDto itemDto) {
+    public ResponseEntity<Object> createItem(@RequestHeader(sharerUserId) long userId,
+                                             @Validated(Create.class) @RequestBody ItemDto itemDto) {
         return itemClient.createItem(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> updateItem(@RequestHeader(sharerUserId) long userId, @PathVariable long itemId, @Valid @RequestBody ItemDto itemDto) {
+    public ResponseEntity<Object> updateItem(@RequestHeader(sharerUserId) long userId, @PathVariable long itemId,
+                                             @Validated(Update.class) @RequestBody ItemDto itemDto) {
         return itemClient.updateItem(userId, itemId, itemDto);
     }
 
@@ -52,7 +56,7 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> addComment(@RequestHeader(sharerUserId) long userId, @PathVariable long itemId,
-                                             @Valid @RequestBody CommentDto commentDto) {
+                                             @Validated(Create.class) @RequestBody CommentDto commentDto) {
         return itemClient.addComment(userId, itemId, commentDto);
     }
 }
